@@ -1,0 +1,27 @@
+package com.project.LoanBookingApplication.Entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "lenders")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Lender {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long lenderId;
+
+    private String lenderName;
+    @Enumerated(EnumType.STRING)
+    private LenderType lenderType;
+
+//    @Enumerated(EnumType.STRING)
+//    private LenderStatus lenderStatus;
+}
