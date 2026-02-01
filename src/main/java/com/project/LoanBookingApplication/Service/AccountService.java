@@ -1,14 +1,14 @@
 package com.project.LoanBookingApplication.Service;
 
 import com.project.LoanBookingApplication.DTO.AccountRequest;
-//import com.project.LoanBookingApplication.DTO.LoanRequest;
+import com.project.LoanBookingApplication.DTO.AccountResponse;
 import com.project.LoanBookingApplication.Entity.Account;
+import com.project.LoanBookingApplication.Entity.AccountType;
 import com.project.LoanBookingApplication.Entity.User;
+import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Repository.AccountRepository;
 import com.project.LoanBookingApplication.Repository.UserRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import java.util.List;
 
 @Service
@@ -20,25 +20,62 @@ public class AccountService {
         this.userRepository = userRepository;
     }
 
-    public Account createAccount(@RequestBody AccountRequest accountRequest){
+    public AccountResponse createAccount(AccountRequest accountRequest) {
+
+        User user = userRepository.findById(accountRequest.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         Account account = new Account();
-        User user =  userRepository.findById(accountRequest.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
         account.setUser(user);
         account.setAccountNumber(accountRequest.getAccountNumber());
         account.setType(accountRequest.getType());
         account.setBank(accountRequest.getBank());
         account.setIfsc(accountRequest.getIfsc());
-        return accountRepository.save(account);
+
+        Account savedAccount = accountRepository.save(account);
+        return mapToResponse(savedAccount);
     }
 
-    public Account getAccount(Long account_id){
-        return accountRepository.findById(account_id).orElseThrow();
-    }
-    public List<Account> getAllAccounts(){
-        return accountRepository.findAll();
+    public List<AccountResponse> getAllAccounts(Long accountId, AccountType accountType) {
+
+        List<Account> accounts = accountRepository.findAll();
+
+        if (accountId != null) {
+            accounts = accounts.stream()
+                    .filter(a -> a.getId().equals(accountId))
+                    .toList();
+        }
+
+        if (accountType != null) {
+            accounts = accounts.stream()
+                    .filter(a -> a.getType() == accountType)
+                    .toList();
+        }
+
+        if (accounts.isEmpty()) {
+            throw new ResourceNotFoundException("Account not found");
+        }
+
+        return accounts.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
-//    public List<Account> getAllAccounts() {
-//        return accountRepository.findAll();
-//    }
+
+
+
+    private AccountResponse mapToResponse(Account account) {
+        AccountResponse response = new AccountResponse();
+
+        response.setId(account.getId());
+        response.setAccountNumber(account.getAccountNumber());
+        response.setBank(account.getBank());
+        response.setIfsc(account.getIfsc());
+        response.setAccountType(account.getType());
+        response.setUserName(account.getUser().getUserName());
+        response.setPanNumber(account.getUser().getPanNumber());
+
+        return response;
+    }
+
 }

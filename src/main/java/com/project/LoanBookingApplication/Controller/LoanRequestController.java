@@ -8,6 +8,7 @@ import com.project.LoanBookingApplication.Entity.User;
 import com.project.LoanBookingApplication.Service.EligibleOfferService;
 import com.project.LoanBookingApplication.Service.LoanRequestService;
 //import com.project.LoanBookingApplication.Service.OfferService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class LoanRequestController {
     }
 
     @PostMapping("/request")
-    public LoanRequest requestLoan(@RequestBody LoanRequestDTO loanRequestDTO){
+    public LoanRequest requestLoan(@Valid @RequestBody LoanRequestDTO loanRequestDTO){
         return loanRequestService.requestLoan(loanRequestDTO);
     }
     @GetMapping("/offers/{requestid}")

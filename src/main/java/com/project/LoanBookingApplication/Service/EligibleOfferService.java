@@ -66,6 +66,8 @@ public class EligibleOfferService {
             response.setLoanAmount(loanRequest.getAmount());
             response.setLoanType(offer.getLoanType());
             response.setEmi(emi);
+            response.setLenderName(offer.getLender().getLenderName());
+            response.setLenderType(offer.getLender().getLenderType());
 
             responses.add(response);
         }

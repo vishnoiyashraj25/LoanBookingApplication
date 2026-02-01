@@ -2,7 +2,9 @@ package com.project.LoanBookingApplication.Service;
 
 import com.project.LoanBookingApplication.DTO.UserRequest;
 import com.project.LoanBookingApplication.Entity.User;
+import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Repository.UserRepository;
+import jakarta.validation.constraints.Null;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,10 +33,40 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow();
+//    public User getUser(Long userId) {
+//        return userRepository.findById(userId).orElseThrow();
+//    }
+public List<User> getAllUsers(
+        Long userId,
+        String employeeType,
+        Boolean kycVerified
+) {
+
+    List<User> users = userRepository.findAll();
+
+    if (userId != null) {
+        users = users.stream()
+                .filter(u -> u.getUserId().equals(userId))
+                .toList();
     }
-    public List<User> getAllUsers(){
-            return userRepository.findAll();
+
+    if (employeeType != null) {
+        users = users.stream()
+                .filter(u -> employeeType.equalsIgnoreCase(u.getEmployeeType()))
+                .toList();
     }
+
+    if (kycVerified != null) {
+        users = users.stream()
+                .filter(u -> Boolean.TRUE.equals(u.getKycVerified()) == kycVerified)
+                .toList();
+    }
+
+    if (users.isEmpty()) {
+        throw new ResourceNotFoundException("No users found");
+    }
+
+    return users;
+}
+
 }

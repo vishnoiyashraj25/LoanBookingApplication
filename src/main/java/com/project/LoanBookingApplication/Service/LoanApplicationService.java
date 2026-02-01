@@ -1,6 +1,8 @@
 package com.project.LoanBookingApplication.Service;
 
+import com.project.LoanBookingApplication.DTO.LoanApplicationResponse;
 import com.project.LoanBookingApplication.Entity.*;
+import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Repository.LoanApplicationRepository;
 import com.project.LoanBookingApplication.Repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.Repository.OfferRepository;
@@ -29,7 +31,39 @@ public class LoanApplicationService {
         this.loanService = loanService;
     }
 
-    public LoanApplication selectOffer(Long loanRequestId, Long offerId) {
+    private LoanApplicationResponse mapToResponse(LoanApplication application) {
+
+        LoanApplicationResponse response = new LoanApplicationResponse();
+
+        response.setId(application.getId());
+
+        response.setUserName(
+                application.getLoanRequest().getUser().getUserName()
+        );
+        response.setPanNumber(
+                application.getLoanRequest().getUser().getPanNumber()
+        );
+
+        response.setLenderName(
+                application.getOffer().getLender().getLenderName()
+        );
+        response.setLenderType(
+                application.getOffer().getLender().getLenderType()
+        );
+
+        response.setStatus(application.getStatus());
+        response.setEmi(application.getEmi());
+        response.setInterestRate(application.getInterestRate());
+        response.setLoanAmount(application.getLoanAmount());
+        response.setTenure(application.getTenure());
+        response.setCreatedAt(application.getCreatedAt());
+        response.setExpiredAt(application.getExpiredAt());
+
+        return response;
+    }
+
+
+    public LoanApplicationResponse selectOffer(Long loanRequestId, Long offerId) {
 
         LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
                 .orElseThrow(() -> new RuntimeException("Loan request not found"));
@@ -54,7 +88,10 @@ public class LoanApplicationService {
 
         application.setEmi(emi);
 
-        return loanApplicationRepository.save(application);
+        LoanApplication savedApplication =
+                loanApplicationRepository.save(application);
+
+        return mapToResponse(savedApplication);
     }
 
     private Double calculateEmi(Double principal, Double annualRate, Integer tenure) {
@@ -80,6 +117,54 @@ public class LoanApplicationService {
         loanApplicationRepository.save(application);
         return loanService.createLoan(application);
 
-
     }
+
+    public List<LoanApplicationResponse> getApplication(
+            ApplicationStatus status,
+            String lenderName,
+            String panNumber, LenderType lenderType
+    ) {
+
+        List<LoanApplication> loanApplications = loanApplicationRepository.findAll();
+
+        if (status != null) {
+            loanApplications = loanApplications.stream()
+                    .filter(a -> a.getStatus() == status)
+                    .toList();
+        }
+
+        if (lenderName != null) {
+            loanApplications = loanApplications.stream()
+                    .filter(a -> a.getOffer()
+                            .getLender()
+                            .getLenderName()
+                            .equalsIgnoreCase(lenderName))
+                    .toList();
+        }
+
+        if (panNumber != null) {
+            loanApplications = loanApplications.stream()
+                    .filter(a -> a.getLoanRequest()
+                            .getUser()
+                            .getPanNumber()
+                            .equalsIgnoreCase(panNumber))
+                    .toList();
+        }
+        if (lenderType != null) {
+            loanApplications = loanApplications.stream()
+                    .filter(a -> a.getOffer()
+                            .getLender()
+                            .getLenderType() == lenderType)
+                    .toList();
+        }
+
+        if (loanApplications.isEmpty()) {
+            throw new ResourceNotFoundException("No Loan Applications found");
+        }
+
+        return loanApplications.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
 }

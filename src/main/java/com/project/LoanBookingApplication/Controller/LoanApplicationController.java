@@ -1,6 +1,9 @@
 package com.project.LoanBookingApplication.Controller;
 
+import com.project.LoanBookingApplication.DTO.LoanApplicationResponse;
+import com.project.LoanBookingApplication.Entity.ApplicationStatus;
 import com.project.LoanBookingApplication.Entity.EmiSchedule;
+import com.project.LoanBookingApplication.Entity.LenderType;
 import com.project.LoanBookingApplication.Entity.LoanApplication;
 import com.project.LoanBookingApplication.Service.LoanApplicationService;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +21,7 @@ public class LoanApplicationController {
     }
 
     @PostMapping("/{loanRequestId}/offer/{offerId}")
-    public LoanApplication selectOffer(
+    public LoanApplicationResponse selectOffer(
             @PathVariable Long loanRequestId,
             @PathVariable Long offerId) {
 
@@ -29,5 +32,10 @@ public class LoanApplicationController {
     public List<EmiSchedule> updateStatus(@PathVariable Long id) {
 
         return loanApplicationService.updateStatus(id);
+    }
+
+    @GetMapping
+    public List<LoanApplicationResponse> getApplication(@RequestParam (required = false)ApplicationStatus status, @RequestParam(required = false) String lenderName, @RequestParam(required = false)String panNumber, @RequestParam(required = false)LenderType lenderType){
+        return loanApplicationService.getApplication(status,lenderName,panNumber,lenderType);
     }
 }

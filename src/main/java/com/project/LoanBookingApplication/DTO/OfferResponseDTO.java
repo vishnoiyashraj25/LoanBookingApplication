@@ -1,47 +1,27 @@
 package com.project.LoanBookingApplication.DTO;
 
+import com.project.LoanBookingApplication.Entity.LenderType;
 import com.project.LoanBookingApplication.Entity.LoanType;
 import com.project.LoanBookingApplication.Entity.OfferStatus;
-import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class OfferRequest {
+public class OfferResponseDTO {
 
-    @NotNull(message = "Lender ID is required")
-    private Long lenderId;
+    private Long offerId;
+    private String lenderName;
+    private LenderType lenderType;
 
-    @NotNull
-    @Min(1)
     private Integer minTenure;
-
-    @NotNull
-    @Max(360)
     private Integer maxTenure;
-
-    @NotNull
-    @DecimalMin(value = "0.1", message = "Interest rate too low")
-    @DecimalMax(value = "50.0", message = "Interest rate too high")
     private Double interestRate;
 
-    @NotNull
-    @Positive
     private Double minIncome;
-
-    @NotNull
-    @Min(300)
-    @Max(900)
     private Integer minCreditScore;
-
-    @NotNull
-    @Positive
     private Double maxAmount;
 
-    @NotNull
     private LoanType loanType;
-
-    @NotNull
     private OfferStatus status;
 }

@@ -51,6 +51,9 @@ public class PaymentService {
         emiSchedule.setStatus(EmiStatus.PAID);
         emiRepository.save(emiSchedule);
         loan.setDuesAmount(loan.getDuesAmount() - emiSchedule.getAmount());
+        if(loan.getDuesAmount()==0){
+            loan.setStatus(LoanStatus.Closed);
+        }
         loanRepository.save(loan);
         return paymentRepository.save(payment);
     }

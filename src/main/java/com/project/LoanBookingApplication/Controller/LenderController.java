@@ -2,11 +2,17 @@ package com.project.LoanBookingApplication.Controller;
 
 import com.project.LoanBookingApplication.DTO.LenderRequest;
 import com.project.LoanBookingApplication.Entity.Lender;
+import com.project.LoanBookingApplication.Entity.LenderType;
 import com.project.LoanBookingApplication.Service.LenderService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/lenders")
 public class LenderController {
@@ -17,18 +23,30 @@ public class LenderController {
     }
 
     @PostMapping
-    public Lender register(@RequestBody LenderRequest request) {
+    public Lender register(@Valid @RequestBody LenderRequest request) {
         return lenderService.registerLender(request);
     }
 
-    @GetMapping("/{lenderid}")
-    public Lender getLender(@PathVariable Long lenderid) {
-        return lenderService.getLender(lenderid);
-    }
+//    @GetMapping("/{lenderid}")
+//    public Lender getLender(@PathVariable Long lenderid) {
+//        return lenderService.getLender(lenderid);
+//    }
 
     @GetMapping
-    public List<Lender> getAllLenders(){
-        return lenderService.getAllLenders();
+    public List<Lender> getAllLenders(
+
+            @RequestParam(required = false)
+            @Positive(message = "lenderId must be positive")
+            Long lenderId,
+
+            @RequestParam(required = false)
+            @Size(min = 2, message = "lenderName must be at least 2 characters")
+            String lenderName,
+
+            @RequestParam(required = false)
+            LenderType lenderType
+    ) {
+        return lenderService.getAllLenders(lenderId, lenderName, lenderType);
     }
 
 }

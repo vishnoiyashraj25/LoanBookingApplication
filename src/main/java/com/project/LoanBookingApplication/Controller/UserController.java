@@ -3,6 +3,7 @@ package com.project.LoanBookingApplication.Controller;
 import com.project.LoanBookingApplication.DTO.UserRequest;
 import com.project.LoanBookingApplication.Entity.User;
 import com.project.LoanBookingApplication.Service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,17 +19,17 @@ public class UserController {
     }
 
     @PostMapping
-    public User register(@RequestBody UserRequest request) {
+    public User register(@Valid @RequestBody UserRequest request) {
         return userService.registerUser(request);
     }
 
-    @GetMapping("/{userId}")
-    public User getUser(@PathVariable Long userId) {
-        return userService.getUser(userId);
-    }
+//    @GetMapping("/{userId}")
+//    public User getUser(@PathVariable Long userId) {
+//        return userService.getUser(userId);
+//    }
 
     @GetMapping
-    public List<User> getAllUsers(){
-        return userService.getAllUsers();
+    public List<User> getAllUsers(@RequestParam(required = false) Long userId, @RequestParam(required = false) String employeeType, @RequestParam(required = false) Boolean kycVerified){
+        return userService.getAllUsers(userId,employeeType,kycVerified);
     }
 }
