@@ -3,9 +3,11 @@ package com.project.LoanBookingApplication.Service;
 import com.project.LoanBookingApplication.DTO.LoanApplicationResponse;
 import com.project.LoanBookingApplication.Entity.*;
 import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
+import com.project.LoanBookingApplication.Kafka.Producer.LoanEventProducer;
 import com.project.LoanBookingApplication.Repository.LoanApplicationRepository;
 import com.project.LoanBookingApplication.Repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.Repository.OfferRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,17 +20,20 @@ public class LoanApplicationService {
     private final OfferRepository offerRepository;
     private final LoanApplicationRepository loanApplicationRepository;
     private final LoanService loanService;
+    private final LoanEventProducer loanEventProducer;
+
 
     public LoanApplicationService(
             LoanRequestRepository loanRequestRepository,
             OfferRepository offerRepository,
             LoanApplicationRepository loanApplicationRepository,
-            LoanService loanService) {
+            LoanService loanService, LoanEventProducer loanEventProducer) {
 
         this.loanRequestRepository = loanRequestRepository;
         this.offerRepository = offerRepository;
         this.loanApplicationRepository = loanApplicationRepository;
         this.loanService = loanService;
+        this.loanEventProducer = loanEventProducer;
     }
 
     private LoanApplicationResponse mapToResponse(LoanApplication application) {
@@ -62,11 +67,15 @@ public class LoanApplicationService {
         return response;
     }
 
-
+    @Transactional
     public LoanApplicationResponse selectOffer(Long loanRequestId, Long offerId) {
 
         LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
                 .orElseThrow(() -> new RuntimeException("Loan request not found"));
+
+        if (loanApplicationRepository.existsByLoanRequest(loanRequest)) {
+            throw new RuntimeException("Application already created for this request");
+        }
 
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new RuntimeException("Offer not found"));
@@ -108,14 +117,22 @@ public class LoanApplicationService {
         return Math.round((numerator / denominator) * 100.0) / 100.0;
     }
 
-    public List<EmiSchedule> updateStatus(Long applicationId) {
+    @Transactional
+    public String updateStatus(Long applicationId) {
 
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
+
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new RuntimeException("Already processed");
+        }
+
         application.setStatus(ApplicationStatus.APPROVED);
         loanApplicationRepository.save(application);
-        return loanService.createLoan(application);
+        loanEventProducer.sendLoanApprovedEvent(applicationId);
+
+        return "Loan approved. Processing started asynchronously.";
 
     }
 

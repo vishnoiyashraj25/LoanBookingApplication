@@ -18,11 +18,13 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(unique = true, nullable = false)
     private String accountNumber;
+
     private String bank;
     private String ifsc;
 

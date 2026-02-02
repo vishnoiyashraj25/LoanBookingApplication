@@ -29,7 +29,7 @@ public class LoanApplicationController {
     }
 
     @PutMapping("/application/{id}/approve")
-    public List<EmiSchedule> updateStatus(@PathVariable Long id) {
+    public String updateStatus(@PathVariable Long id) {
 
         return loanApplicationService.updateStatus(id);
     }

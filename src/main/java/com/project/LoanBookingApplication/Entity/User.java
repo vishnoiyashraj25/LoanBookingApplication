@@ -19,10 +19,17 @@ public class User {
     private Long userId;
 
     private String userName;
+
+    @Column(unique = true)
     private String email;
+
+    @Column(unique = true)
     private String phoneNumber;
 
+    @Column(unique = true)
     private String aadharNumber;
+
+    @Column(unique = true)
     private String panNumber;
 
     private Boolean kycVerified;

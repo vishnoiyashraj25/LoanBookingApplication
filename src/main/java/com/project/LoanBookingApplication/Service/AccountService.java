@@ -8,6 +8,7 @@ import com.project.LoanBookingApplication.Entity.User;
 import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Repository.AccountRepository;
 import com.project.LoanBookingApplication.Repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class AccountService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public AccountResponse createAccount(AccountRequest accountRequest) {
 
         User user = userRepository.findById(accountRequest.getUserId())
@@ -35,6 +37,7 @@ public class AccountService {
         Account savedAccount = accountRepository.save(account);
         return mapToResponse(savedAccount);
     }
+
 
     public List<AccountResponse> getAllAccounts(Long accountId, AccountType accountType) {
 

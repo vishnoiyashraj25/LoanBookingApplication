@@ -18,7 +18,9 @@ public class Lender {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long lenderId;
 
+    @Column(unique = true, nullable = false)
     private String lenderName;
+
     @Enumerated(EnumType.STRING)
     private LenderType lenderType;
 

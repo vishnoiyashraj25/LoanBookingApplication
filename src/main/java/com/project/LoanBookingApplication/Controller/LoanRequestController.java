@@ -24,12 +24,17 @@ public class LoanRequestController {
     }
 
     @PostMapping("/request")
-    public LoanRequest requestLoan(@Valid @RequestBody LoanRequestDTO loanRequestDTO){
-        return loanRequestService.requestLoan(loanRequestDTO);
+    public LoanRequest createLoanRequest(@Valid @RequestBody LoanRequestDTO loanRequestDTO){
+        return loanRequestService.createLoanRequest(loanRequestDTO);
     }
     @GetMapping("/offers/{requestid}")
     public List<OfferResponse> getOffers(@PathVariable Long requestid){
         return eligibleOfferService.getOffers(requestid);
+    }
+
+    @GetMapping("/requests")
+    public List<LoanRequest> getLoanRequest(){
+        return loanRequestService.getLoanRequest();
     }
 }
 

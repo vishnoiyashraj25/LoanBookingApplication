@@ -24,8 +24,8 @@ public class LoanApplication {
     @JoinColumn(name = "offer_id", nullable = false)
     private Offer offer;
 
-    @ManyToOne
-    @JoinColumn(name = "loan_request_id", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "loan_request_id", nullable = false, unique = true)
     private LoanRequest loanRequest;
 
     @Enumerated(EnumType.STRING)
@@ -38,4 +38,7 @@ public class LoanApplication {
 
     private LocalDateTime createdAt;
     private LocalDateTime expiredAt;
+
+    @Version
+    private Integer version;
 }

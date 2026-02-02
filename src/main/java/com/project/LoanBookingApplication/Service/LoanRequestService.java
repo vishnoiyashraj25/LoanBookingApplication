@@ -2,11 +2,16 @@ package com.project.LoanBookingApplication.Service;
 
 import com.project.LoanBookingApplication.DTO.LoanRequestDTO;
 import com.project.LoanBookingApplication.Entity.LoanRequest;
+import com.project.LoanBookingApplication.Entity.RequestStatus;
 import com.project.LoanBookingApplication.Entity.User;
+import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.Repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 @Service
 public class LoanRequestService {
@@ -17,15 +22,30 @@ public class LoanRequestService {
         this.loanRequestRepository = loanRequestRepository;
         this.userRepository = userRepository;
     }
-    public LoanRequest requestLoan(@RequestBody LoanRequestDTO loanRequestDTO)
-    {
-        LoanRequest loanRequest = new LoanRequest();
-        loanRequest.setLoanType(loanRequestDTO.getLoanType());
-        loanRequest.setAmount(loanRequestDTO.getAmount());
-        loanRequest.setTenure(loanRequestDTO.getTenure());
-        User user = userRepository.findById(loanRequestDTO.getUserid()).orElseThrow();
-        loanRequest.setUser(user);
-        return loanRequestRepository.save(loanRequest);
+    @Transactional
+    public LoanRequest createLoanRequest(LoanRequestDTO dto) {
+
+        User user = userRepository.findById(dto.getUserid())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        boolean exists =
+                loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.ACTIVE);
+
+        if (exists)
+            throw new RuntimeException("Active request already exists");
+
+        LoanRequest req = new LoanRequest();
+        req.setUser(user);
+        req.setAmount(dto.getAmount());
+        req.setTenure(dto.getTenure());
+        req.setLoanType(dto.getLoanType());
+        req.setRequestStatus(RequestStatus.ACTIVE);
+
+        return loanRequestRepository.save(req);
+    }
+
+    public List<LoanRequest> getLoanRequest(){
+        return loanRequestRepository.findAll();
     }
 
 }

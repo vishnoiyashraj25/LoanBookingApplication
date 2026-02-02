@@ -25,5 +25,5 @@ public class LoanRequest {
     private Double amount;
     private Integer tenure;
     private LoanType loanType;
-
+    private RequestStatus requestStatus;
 }

@@ -1,6 +1,7 @@
 package com.project.LoanBookingApplication.Exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -98,5 +99,11 @@ public class GlobalExceptionHandler {
         body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDuplicate() {
+        return ResponseEntity.badRequest().body("Already exists.");
+    }
+
 
 }
