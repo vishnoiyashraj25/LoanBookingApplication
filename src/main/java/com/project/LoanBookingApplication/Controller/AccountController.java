@@ -24,13 +24,6 @@ public class AccountController {
         return accountService.createAccount(accountRequest);
     }
 
-//    @GetMapping("/{account_id}")
-//    public Account getAccount(@PathVariable Long account_id){
-//        return accountService.getAccount(account_id);
-//    }
-
-
-
     @GetMapping
     public List<AccountResponse> getAllAccounts(@Valid @RequestParam(required = false) Long account_id, @Valid @RequestParam(required = false)AccountType accountType){
         return accountService.getAllAccounts(account_id,accountType);

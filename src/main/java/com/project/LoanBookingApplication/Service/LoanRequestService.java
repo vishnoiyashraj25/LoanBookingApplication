@@ -32,7 +32,10 @@ public class LoanRequestService {
                 loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.ACTIVE);
 
         if (exists)
-            throw new RuntimeException("Active request already exists");
+        {
+            LoanRequest loanRequest = loanRequestRepository.findByUser(user);
+            loanRequest.setRequestStatus(RequestStatus.CLOSED);
+        }
 
         LoanRequest req = new LoanRequest();
         req.setUser(user);

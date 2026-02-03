@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LoanRequestRepository extends JpaRepository<LoanRequest,Long>{
     boolean existsByUserAndRequestStatus(User user, RequestStatus requestStatus);
+    LoanRequest findByUser(User user);
 }

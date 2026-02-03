@@ -1,12 +1,15 @@
 package com.project.LoanBookingApplication.Service;
 
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.LoanBookingApplication.DTO.LenderRequest;
 import com.project.LoanBookingApplication.Entity.Lender;
-import com.project.LoanBookingApplication.Entity.LenderStatus;
 import com.project.LoanBookingApplication.Entity.LenderType;
 import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Repository.LenderRepository;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,23 +18,32 @@ import java.util.List;
 public class LenderService {
 
     private final LenderRepository lenderRepository;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public LenderService(LenderRepository lenderRepository){
         this.lenderRepository = lenderRepository;
     }
 
+    @CacheEvict(value = "lenders", allEntries = true)
     public Lender registerLender(LenderRequest request){
+
         Lender lender = new Lender();
+
         lender.setLenderName(request.getLenderName());
         lender.setLenderType(request.getLenderType());
 
         return lenderRepository.save(lender);
     }
-//    public Lender getLender(Long lenderid){
-//        return lenderRepository.findById(lenderid).orElseThrow();
-//    }
 
-    public List<Lender> getAllLenders(Long lenderId, String lenderName, LenderType lenderType) {
+    @Cacheable(value = "lenders",
+            key = "#lenderId + '-' + #lenderName + '-' + #lenderType")
+    public String getAllLendersJson(
+            Long lenderId,
+            String lenderName,
+            LenderType lenderType
+    ) throws Exception {
+
+        // 🔥 YOUR EXACT BUSINESS LOGIC (unchanged)
 
         List<Lender> lenders = lenderRepository.findAll();
 
@@ -57,7 +69,10 @@ public class LenderService {
             throw new ResourceNotFoundException("No Lender found");
         }
 
-        return lenders;
+        return mapper.writeValueAsString(lenders);
     }
 
+    public List<Lender> parse(String json) throws Exception {
+        return mapper.readValue(json, new TypeReference<List<Lender>>() {});
+    }
 }

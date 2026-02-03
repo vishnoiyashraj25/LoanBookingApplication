@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "offers")
+@Table(name = "offers", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"lender_id", "loan_type", "min_tenure", "max_tenure", "interest_rate", "max_amount"})
+})
+
 @Getter
 @Setter
 @NoArgsConstructor

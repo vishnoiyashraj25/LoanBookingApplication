@@ -27,11 +27,6 @@ public class LenderController {
         return lenderService.registerLender(request);
     }
 
-//    @GetMapping("/{lenderid}")
-//    public Lender getLender(@PathVariable Long lenderid) {
-//        return lenderService.getLender(lenderid);
-//    }
-
     @GetMapping
     public List<Lender> getAllLenders(
 
@@ -45,8 +40,12 @@ public class LenderController {
 
             @RequestParam(required = false)
             LenderType lenderType
-    ) {
-        return lenderService.getAllLenders(lenderId, lenderName, lenderType);
+    ) throws Exception {
+
+        String json = lenderService.getAllLendersJson(lenderId, lenderName, lenderType);
+
+        return lenderService.parse(json);
     }
+
 
 }

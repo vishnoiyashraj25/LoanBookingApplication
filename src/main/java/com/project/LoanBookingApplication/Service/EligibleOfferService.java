@@ -1,12 +1,10 @@
 package com.project.LoanBookingApplication.Service;
 
 import com.project.LoanBookingApplication.DTO.OfferResponse;
-import com.project.LoanBookingApplication.Entity.LoanRequest;
-import com.project.LoanBookingApplication.Entity.Offer;
-import com.project.LoanBookingApplication.Entity.OfferStatus;
-import com.project.LoanBookingApplication.Entity.User;
+import com.project.LoanBookingApplication.Entity.*;
 import com.project.LoanBookingApplication.Repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.Repository.OfferRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,13 +22,22 @@ public class EligibleOfferService {
         this.offerRepository = offerRepository;
     }
 
+    @Cacheable("offers")
+    public List<Offer> getAllOffersCached() {
+        return offerRepository.findAll();
+    }
+
     public List<OfferResponse> getOffers(Long requestId) {
 
         LoanRequest loanRequest = loanRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Loan request not found"));
 
+        if(loanRequest.getRequestStatus()== RequestStatus.CLOSED){
+            throw new RuntimeException ("Loan request is closed");
+        }
+
         User user = loanRequest.getUser();
-        List<Offer> offers = offerRepository.findAll();
+        List<Offer> offers = getAllOffersCached();
 
         List<OfferResponse> responses = new ArrayList<>();
 

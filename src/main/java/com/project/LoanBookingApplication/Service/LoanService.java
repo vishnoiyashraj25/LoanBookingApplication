@@ -42,17 +42,18 @@ public class LoanService {
         loan.setEmi(application.getEmi());
         loan.setInterest(application.getInterestRate());
         loan.setLoanNumber(generateLoanNumber(application));
-//        Account account = accountRepository.findById(user.getUserId()).orElseThrow();
         Account account = accountRepository.findByUser(user);
         if (account == null) {
             throw new IllegalStateException("User account not found for userId: " + user.getUserId());
         }
-
-//        loan.setDisbursementAccount(account);
         loan.setDisbursementAccount(account);
         loanRepository.save(loan);
 
         return emiService.createEMI(loan);
+    }
+
+    public List<Loan>getLoan(){
+        return loanRepository.findAll();
     }
 }
 

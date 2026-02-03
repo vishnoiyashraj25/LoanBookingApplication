@@ -23,13 +23,19 @@ public class OfferController {
         return offerService.createOffer(offerRequest);
     }
 
-//    @GetMapping("/{offer_id}")
-//    public Offer getOffer(@PathVariable Long offer_id){
-//        return offerService.getOffer(offer_id);
-//    }
-
     @GetMapping
-    public List<OfferResponseDTO> getAllOffers(@RequestParam(required = false) Long offerId, @RequestParam(required = false)String lenderName, @RequestParam(required = false)LenderType lenderType, @RequestParam(required = false)LoanType loanType, @RequestParam(required = false) OfferStatus status){
-        return offerService.getAllOffers(offerId,lenderName,lenderType,loanType,status);
+    public List<OfferResponseDTO> getAllOffers(
+            @RequestParam(required = false) Long offerId,
+            @RequestParam(required = false) String lenderName,
+            @RequestParam(required = false) LenderType lenderType,
+            @RequestParam(required = false) LoanType loanType,
+            @RequestParam(required = false) OfferStatus status
+    ) throws Exception {
+
+        String json = offerService.getAllOffersJson(
+                offerId, lenderName, lenderType, loanType, status
+        );
+
+        return offerService.parseJson(json);
     }
 }

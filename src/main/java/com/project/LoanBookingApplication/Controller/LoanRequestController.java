@@ -37,5 +37,3 @@ public class LoanRequestController {
         return loanRequestService.getLoanRequest();
     }
 }
-
-// push push

@@ -23,13 +23,16 @@ public class UserController {
         return userService.registerUser(request);
     }
 
-//    @GetMapping("/{userId}")
-//    public User getUser(@PathVariable Long userId) {
-//        return userService.getUser(userId);
-//    }
-
     @GetMapping
-    public List<User> getAllUsers(@RequestParam(required = false) Long userId, @RequestParam(required = false) String employeeType, @RequestParam(required = false) Boolean kycVerified){
-        return userService.getAllUsers(userId,employeeType,kycVerified);
+    public List<User> getAllUsers(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String employeeType,
+            @RequestParam(required = false) Boolean kycVerified
+    ) throws Exception {
+
+        String json = userService.getAllUsersJson(userId, employeeType, kycVerified);
+
+        return userService.parse(json);
     }
+
 }
