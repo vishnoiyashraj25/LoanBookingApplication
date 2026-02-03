@@ -76,7 +76,6 @@ public class UserService {
             throw new ResourceNotFoundException("No users found");
         }
 
-        // ✅ cache safe JSON
         return mapper.writeValueAsString(users);
     }
 

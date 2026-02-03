@@ -18,15 +18,15 @@ public class Loan {
     @Column(name = "loan_number", length = 30, nullable = false)
     private String loanNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lender_id", nullable = false)
     private Lender lender;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loan_application_id", nullable = false)
     private LoanApplication loanApplication;
 

@@ -129,10 +129,13 @@ public class LoanApplicationService {
         }
 
         application.setStatus(ApplicationStatus.APPROVED);
+        LoanRequest loanRequest = application.getLoanRequest();
+        loanRequest.setRequestStatus(RequestStatus.INPROCESS);
+        loanRequestRepository.save(loanRequest);
         loanApplicationRepository.save(application);
         loanEventProducer.sendLoanApprovedEvent(applicationId);
 
-        return "Loan approved. Processing started asynchronously.";
+        return "Loan approved. Processing started ";
 
     }
 
@@ -183,5 +186,4 @@ public class LoanApplicationService {
                 .map(this::mapToResponse)
                 .toList();
     }
-
 }

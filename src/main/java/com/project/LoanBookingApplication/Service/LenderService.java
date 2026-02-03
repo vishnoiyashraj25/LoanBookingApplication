@@ -43,8 +43,6 @@ public class LenderService {
             LenderType lenderType
     ) throws Exception {
 
-        // 🔥 YOUR EXACT BUSINESS LOGIC (unchanged)
-
         List<Lender> lenders = lenderRepository.findAll();
 
         if (lenderId != null) {

@@ -31,6 +31,14 @@ public class LoanRequestService {
         boolean exists =
                 loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.ACTIVE);
 
+        boolean inprocess =
+                loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.INPROCESS);
+
+        if(inprocess){
+            throw new RuntimeException("This loan request is already in progress and cannot be processed again");
+
+        }
+
         if (exists)
         {
             LoanRequest loanRequest = loanRequestRepository.findByUser(user);

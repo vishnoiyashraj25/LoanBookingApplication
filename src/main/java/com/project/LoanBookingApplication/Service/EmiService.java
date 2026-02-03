@@ -4,6 +4,7 @@ package com.project.LoanBookingApplication.Service;
 import com.project.LoanBookingApplication.Entity.EmiSchedule;
 import com.project.LoanBookingApplication.Entity.EmiStatus;
 import com.project.LoanBookingApplication.Entity.Loan;
+import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Repository.EmiRepository;
 import org.springframework.stereotype.Service;
 
@@ -40,4 +41,28 @@ public class EmiService {
         return schedules;
 
     }
+
+    public List<EmiSchedule> getEMI(Long id, String loanNumber) {
+
+        List<EmiSchedule> emiSchedules = emiRepository.findAll();
+
+        if (id != null) {
+            emiSchedules = emiSchedules.stream()
+                    .filter(e -> e.getId().equals(id))
+                    .toList();
+        }
+
+        if (loanNumber != null) {
+            emiSchedules = emiSchedules.stream()
+                    .filter(e -> e.getLoan().getLoanNumber().equals(loanNumber))
+                    .toList();
+        }
+
+        if (emiSchedules.isEmpty()) {
+            throw new ResourceNotFoundException("No emi exists");
+        }
+
+        return emiSchedules;
+    }
+
 }

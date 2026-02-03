@@ -52,8 +52,6 @@ public class OfferService {
         return mapToResponse(savedOffer);
     }
 
-
-    // 🔥 Cache STRING instead of List
     @Cacheable(
             value = "offers",
             key = "#offerId + '-' + #lenderName + '-' + #lenderType + '-' + #loanType + '-' + #status"
@@ -89,12 +87,10 @@ public class OfferService {
         List<OfferResponseDTO> dtoList =
                 offers.stream().map(this::mapToResponse).toList();
 
-        // 🔥 convert to JSON before caching
+
         return mapper.writeValueAsString(dtoList);
     }
 
-
-    // 🔥 helper to convert JSON back to List
     public List<OfferResponseDTO> parseJson(String json) throws JsonProcessingException {
         return mapper.readValue(json, new TypeReference<List<OfferResponseDTO>>() {});
     }

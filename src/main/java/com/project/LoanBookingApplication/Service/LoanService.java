@@ -3,6 +3,8 @@ package com.project.LoanBookingApplication.Service;
 import com.project.LoanBookingApplication.Entity.*;
 import com.project.LoanBookingApplication.Repository.AccountRepository;
 import com.project.LoanBookingApplication.Repository.LoanRepository;
+import com.project.LoanBookingApplication.Repository.LoanRequestRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -14,11 +16,13 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final AccountRepository accountRepository;
     private final EmiService emiService;
+    private final LoanRequestRepository loanRequestRepository;
 
-    public LoanService(LoanRepository loanRepository, AccountRepository accountRepository, EmiService emiService) {
+    public LoanService(LoanRepository loanRepository, AccountRepository accountRepository, EmiService emiService, LoanRequestRepository loanRequestRepository) {
         this.loanRepository = loanRepository;
         this.accountRepository = accountRepository;
         this.emiService = emiService;
+        this.loanRequestRepository = loanRequestRepository;
     }
 
     private String generateLoanNumber(LoanApplication application) {
@@ -50,6 +54,15 @@ public class LoanService {
         loanRepository.save(loan);
 
         return emiService.createEMI(loan);
+    }
+
+    @Transactional
+    public void processApprovedLoan(LoanApplication application) {
+        createLoan(application);
+
+        LoanRequest req = application.getLoanRequest();
+        req.setRequestStatus(RequestStatus.DONE);
+        loanRequestRepository.save(req);
     }
 
     public List<Loan>getLoan(){
