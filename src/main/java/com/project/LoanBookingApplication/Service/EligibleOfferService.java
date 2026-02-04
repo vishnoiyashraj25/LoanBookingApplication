@@ -32,7 +32,7 @@ public class EligibleOfferService {
         LoanRequest loanRequest = loanRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Loan request not found"));
 
-        if(loanRequest.getRequestStatus()== RequestStatus.CLOSED){
+        if(loanRequest.getRequestStatus()== RequestStatus.REJECTED){
             throw new RuntimeException ("Loan request is closed");
         }
 

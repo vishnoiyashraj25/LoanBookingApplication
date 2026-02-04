@@ -1,5 +1,6 @@
 package com.project.LoanBookingApplication.Service;
 
+import com.project.LoanBookingApplication.DTO.LoanResponse;
 import com.project.LoanBookingApplication.Entity.*;
 import com.project.LoanBookingApplication.Repository.AccountRepository;
 import com.project.LoanBookingApplication.Repository.LoanRepository;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanService {
@@ -65,8 +67,29 @@ public class LoanService {
         loanRequestRepository.save(req);
     }
 
-    public List<Loan>getLoan(){
-        return loanRepository.findAll();
+    LoanResponse mapToDto(Loan loan) {
+        LoanResponse dto = new LoanResponse();
+        dto.setLoanNumber(loan.getLoanNumber());
+        dto.setLenderName(loan.getLender().getLenderName());
+        dto.setUserName(loan.getUser().getUserName());
+        dto.setLoanApplicationId(String.valueOf(loan.getLoanApplication().getId()));
+        dto.setStatus(loan.getStatus());
+        dto.setStartDate(loan.getStartDate());
+        dto.setLoanType(loan.getLoanType());
+        dto.setEmi(loan.getEmi());
+        dto.setInterest(loan.getInterest());
+        dto.setDuesAmount(loan.getDuesAmount());
+        dto.setDisbursementAccountNumber(loan.getDisbursementAccount().getAccountNumber());
+        return dto;
     }
+
+
+    public List<LoanResponse> getAllLoans() {
+        return loanRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
 }
 

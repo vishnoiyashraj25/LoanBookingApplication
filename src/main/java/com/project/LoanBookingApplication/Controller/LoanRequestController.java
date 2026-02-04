@@ -1,16 +1,12 @@
 package com.project.LoanBookingApplication.Controller;
-
 import com.project.LoanBookingApplication.DTO.LoanRequestDTO;
-import com.project.LoanBookingApplication.DTO.OfferRequest;
+import com.project.LoanBookingApplication.DTO.LoanRequestResponse;
 import com.project.LoanBookingApplication.DTO.OfferResponse;
 import com.project.LoanBookingApplication.Entity.LoanRequest;
-import com.project.LoanBookingApplication.Entity.User;
 import com.project.LoanBookingApplication.Service.EligibleOfferService;
 import com.project.LoanBookingApplication.Service.LoanRequestService;
-//import com.project.LoanBookingApplication.Service.OfferService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -33,7 +29,7 @@ public class LoanRequestController {
     }
 
     @GetMapping("/requests")
-    public List<LoanRequest> getLoanRequest(){
+    public List<LoanRequestResponse> getLoanRequest(){
         return loanRequestService.getLoanRequest();
     }
 }

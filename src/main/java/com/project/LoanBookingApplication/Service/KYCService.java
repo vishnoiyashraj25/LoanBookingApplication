@@ -3,6 +3,7 @@ package com.project.LoanBookingApplication.Service;
 
 import com.project.LoanBookingApplication.Entity.User;
 import com.project.LoanBookingApplication.Repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,6 +14,7 @@ public class KYCService {
         this.userRepository = userRepository;
     }
 
+    @CacheEvict(value = "users_list", allEntries = true)
     public User verifyKYC(Long userid){
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new RuntimeException("User not found with id " + userid));
@@ -21,7 +23,6 @@ public class KYCService {
         }
         user.setKycVerified(true);
         return userRepository.save(user);
-
     }
 
 }

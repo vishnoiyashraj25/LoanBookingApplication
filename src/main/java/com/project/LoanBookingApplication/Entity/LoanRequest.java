@@ -24,6 +24,12 @@ public class LoanRequest {
 
     private Double amount;
     private Integer tenure;
+    @Enumerated(EnumType.STRING)
     private LoanType loanType;
+    @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
+
+    private String errorMessage;
+
+
 }

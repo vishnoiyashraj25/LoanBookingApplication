@@ -27,7 +27,6 @@ public class UserService {
     public User registerUser(UserRequest request) {
 
         User user = new User();
-
         user.setUserName(request.getUserName());
         user.setEmail(request.getEmail());
         user.setPhoneNumber(request.getPhoneNumber());

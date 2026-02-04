@@ -4,6 +4,7 @@ import com.project.LoanBookingApplication.DTO.LoanApplicationResponse;
 import com.project.LoanBookingApplication.Entity.*;
 import com.project.LoanBookingApplication.Exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.Kafka.Producer.LoanEventProducer;
+import com.project.LoanBookingApplication.Repository.AccountRepository;
 import com.project.LoanBookingApplication.Repository.LoanApplicationRepository;
 import com.project.LoanBookingApplication.Repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.Repository.OfferRepository;
@@ -11,7 +12,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LoanApplicationService {
@@ -21,19 +24,21 @@ public class LoanApplicationService {
     private final LoanApplicationRepository loanApplicationRepository;
     private final LoanService loanService;
     private final LoanEventProducer loanEventProducer;
+    private final AccountRepository accountRepository;
 
 
     public LoanApplicationService(
             LoanRequestRepository loanRequestRepository,
             OfferRepository offerRepository,
             LoanApplicationRepository loanApplicationRepository,
-            LoanService loanService, LoanEventProducer loanEventProducer) {
+            LoanService loanService, LoanEventProducer loanEventProducer,AccountRepository accountRepository) {
 
         this.loanRequestRepository = loanRequestRepository;
         this.offerRepository = offerRepository;
         this.loanApplicationRepository = loanApplicationRepository;
         this.loanService = loanService;
         this.loanEventProducer = loanEventProducer;
+        this.accountRepository = accountRepository;
     }
 
     private LoanApplicationResponse mapToResponse(LoanApplication application) {
@@ -123,19 +128,34 @@ public class LoanApplicationService {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            throw new RuntimeException("Already processed");
+            throw new RuntimeException("This loan request has already been processed.");
         }
 
-        application.setStatus(ApplicationStatus.APPROVED);
         LoanRequest loanRequest = application.getLoanRequest();
         loanRequest.setRequestStatus(RequestStatus.INPROCESS);
+        loanRequest.setErrorMessage(null);
         loanRequestRepository.save(loanRequest);
-        loanApplicationRepository.save(application);
-        loanEventProducer.sendLoanApprovedEvent(applicationId);
+        try {
+            User user = loanRequest.getUser();
+            Account account = accountRepository.findByUser(user);
+            if (account == null) {
+                throw new IllegalStateException("User account not found for userId: " + user.getUserId());
+            }
 
-        return "Loan approved. Processing started ";
+            loanEventProducer.sendLoanApprovedEvent(applicationId);
+
+            return "Your loan application is being processed. Please check status later.";
+
+        } catch (Exception e) {
+            loanRequest.setRequestStatus(RequestStatus.REJECTED);
+            loanRequest.setErrorMessage(e.getMessage());
+            loanRequestRepository.save(loanRequest);
+            application.setStatus(ApplicationStatus.REJECTED);
+            loanApplicationRepository.save(application);
+            return "Loan rejected: " + e.getMessage();
+        }
+
 
     }
 
@@ -185,5 +205,26 @@ public class LoanApplicationService {
         return loanApplications.stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    public Map<String, String> getLoanStatus(Long id){
+        LoanApplication application = loanApplicationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        LoanRequest request = application.getLoanRequest();
+        Map<String, String> response = new HashMap<>();
+        response.put("status", request.getRequestStatus().name());
+
+        if (request.getRequestStatus() == RequestStatus.REJECTED) {
+            response.put("message", request.getErrorMessage());
+        } else if (request.getRequestStatus() == RequestStatus.DONE) {
+            response.put("message", "Loan approved successfully");
+        } else if (request.getRequestStatus() == RequestStatus.INPROCESS) {
+            response.put("message", "Loan processing in progress");
+        } else {
+            response.put("message", "Loan request is active, not yet processed");
+        }
+        return response;
+
     }
 }

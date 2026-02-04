@@ -11,9 +11,10 @@ import java.time.LocalDateTime;
 @Getter
 public class PaymentResponse {
     private Long id;
-    private String loan_number;
+    private String loanNumber;
+    private Long emiId;
     private Double amount;
     private String transactionId;
-    private PaymentStatus status;
+    private PaymentStatus paymentStatus;
     private LocalDateTime receivedAt;
 }

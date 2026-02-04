@@ -11,7 +11,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 @SpringBootApplication
 public class LoanBookingApplication {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         System.out.println("hello");
         SpringApplication.run(LoanBookingApplication.class, args);
 	}

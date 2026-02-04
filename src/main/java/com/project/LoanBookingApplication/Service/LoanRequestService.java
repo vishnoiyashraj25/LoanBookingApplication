@@ -1,6 +1,7 @@
 package com.project.LoanBookingApplication.Service;
 
 import com.project.LoanBookingApplication.DTO.LoanRequestDTO;
+import com.project.LoanBookingApplication.DTO.LoanRequestResponse;
 import com.project.LoanBookingApplication.Entity.LoanRequest;
 import com.project.LoanBookingApplication.Entity.RequestStatus;
 import com.project.LoanBookingApplication.Entity.User;
@@ -9,7 +10,6 @@ import com.project.LoanBookingApplication.Repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.Repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class LoanRequestService {
         if (exists)
         {
             LoanRequest loanRequest = loanRequestRepository.findByUser(user);
-            loanRequest.setRequestStatus(RequestStatus.CLOSED);
+            loanRequest.setRequestStatus(RequestStatus.REJECTED);
         }
 
         LoanRequest req = new LoanRequest();
@@ -55,8 +55,26 @@ public class LoanRequestService {
         return loanRequestRepository.save(req);
     }
 
-    public List<LoanRequest> getLoanRequest(){
-        return loanRequestRepository.findAll();
+    private LoanRequestResponse mapToDto(LoanRequest req) {
+
+        LoanRequestResponse dto = new LoanRequestResponse();
+
+        dto.setId(req.getId());
+        dto.setUserName(req.getUser().getUserName());
+        dto.setPanNumber(req.getUser().getPanNumber());
+        dto.setAmount(req.getAmount());
+        dto.setTenure(req.getTenure());
+        dto.setLoanType(req.getLoanType());
+        dto.setRequestStatus(req.getRequestStatus());
+
+        return dto;
     }
 
+
+    public List<LoanRequestResponse> getLoanRequest(){
+        return loanRequestRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
 }

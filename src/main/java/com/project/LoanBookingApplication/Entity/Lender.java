@@ -20,7 +20,6 @@ public class Lender {
 
     @Column(unique = true, nullable = false)
     private String lenderName;
-
     @Enumerated(EnumType.STRING)
     private LenderType lenderType;
 

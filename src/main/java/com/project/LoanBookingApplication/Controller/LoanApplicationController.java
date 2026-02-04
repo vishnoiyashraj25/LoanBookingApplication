@@ -1,12 +1,14 @@
 package com.project.LoanBookingApplication.Controller;
 
 import com.project.LoanBookingApplication.DTO.LoanApplicationResponse;
+import com.project.LoanBookingApplication.DTO.LoanResponse;
 import com.project.LoanBookingApplication.Entity.*;
 import com.project.LoanBookingApplication.Service.LoanApplicationService;
 import com.project.LoanBookingApplication.Service.LoanService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/loan")
@@ -34,13 +36,19 @@ public class LoanApplicationController {
         return loanApplicationService.updateStatus(id);
     }
 
+    @GetMapping("/application/{id}/status")
+    public Map<String, String> getLoanStatus(@PathVariable Long id){
+        return loanApplicationService.getLoanStatus(id);
+    }
+
     @GetMapping
     public List<LoanApplicationResponse> getApplication(@RequestParam (required = false)ApplicationStatus status, @RequestParam(required = false) String lenderName, @RequestParam(required = false)String panNumber, @RequestParam(required = false)LenderType lenderType){
         return loanApplicationService.getApplication(status,lenderName,panNumber,lenderType);
     }
 
     @GetMapping("/loans")
-    public List<Loan>getLoan(){
-        return loanService.getLoan();
+    public List<LoanResponse> getAllLoans() {
+        return loanService.getAllLoans();
     }
+
 }
