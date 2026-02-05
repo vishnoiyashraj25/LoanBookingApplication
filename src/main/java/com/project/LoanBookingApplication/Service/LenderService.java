@@ -28,7 +28,6 @@ public class LenderService {
     public Lender registerLender(LenderRequest request){
 
         Lender lender = new Lender();
-
         lender.setLenderName(request.getLenderName());
         lender.setLenderType(request.getLenderType());
 

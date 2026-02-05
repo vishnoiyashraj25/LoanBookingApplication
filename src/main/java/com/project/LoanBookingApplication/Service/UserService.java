@@ -49,8 +49,6 @@ public class UserService {
             Boolean kycVerified
     ) throws Exception {
 
-
-
         List<User> users = userRepository.findAll();
 
         if (userId != null) {

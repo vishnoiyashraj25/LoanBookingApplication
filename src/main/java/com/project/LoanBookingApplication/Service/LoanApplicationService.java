@@ -26,7 +26,6 @@ public class LoanApplicationService {
     private final LoanEventProducer loanEventProducer;
     private final AccountRepository accountRepository;
 
-
     public LoanApplicationService(
             LoanRequestRepository loanRequestRepository,
             OfferRepository offerRepository,
@@ -145,18 +144,14 @@ public class LoanApplicationService {
 
             loanEventProducer.sendLoanApprovedEvent(applicationId);
 
-            return "Your loan application is being processed. Please check status later.";
-
         } catch (Exception e) {
             loanRequest.setRequestStatus(RequestStatus.REJECTED);
             loanRequest.setErrorMessage(e.getMessage());
             loanRequestRepository.save(loanRequest);
             application.setStatus(ApplicationStatus.REJECTED);
             loanApplicationRepository.save(application);
-            return "Loan rejected: " + e.getMessage();
         }
-
-
+        return "Your loan application is being processed. Please check status later.";
     }
 
     public List<LoanApplicationResponse> getApplication(

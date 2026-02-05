@@ -28,8 +28,6 @@ public class LoanRequestService {
         User user = userRepository.findById(dto.getUserid())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        boolean exists =
-                loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.ACTIVE);
 
         boolean inprocess =
                 loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.INPROCESS);
@@ -39,11 +37,12 @@ public class LoanRequestService {
 
         }
 
-        if (exists)
-        {
-            LoanRequest loanRequest = loanRequestRepository.findByUser(user);
-            loanRequest.setRequestStatus(RequestStatus.REJECTED);
-        }
+        loanRequestRepository
+                .findFirstByUserAndRequestStatus(user, RequestStatus.ACTIVE)
+                .ifPresent(lr -> {
+                    lr.setRequestStatus(RequestStatus.REJECTED);
+                    loanRequestRepository.save(lr);
+                });
 
         LoanRequest req = new LoanRequest();
         req.setUser(user);

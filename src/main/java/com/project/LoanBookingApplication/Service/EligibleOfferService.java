@@ -36,6 +36,10 @@ public class EligibleOfferService {
             throw new RuntimeException ("Loan request is closed");
         }
 
+        if(loanRequest.getRequestStatus()==RequestStatus.DONE){
+            throw new RuntimeException("Loan request is already proceed");
+        }
+
         User user = loanRequest.getUser();
         List<Offer> offers = getAllOffersCached();
 
@@ -65,6 +69,7 @@ public class EligibleOfferService {
                     offer.getInterestRate(),
                     loanRequest.getTenure()
             );
+
             OfferResponse response = new OfferResponse();
             response.setOfferId(offer.getOfferId());
             response.setLenderId(offer.getLender().getLenderId());

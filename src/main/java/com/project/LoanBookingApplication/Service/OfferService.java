@@ -12,7 +12,6 @@ import com.project.LoanBookingApplication.Repository.OfferRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -94,7 +93,6 @@ public class OfferService {
     public List<OfferResponseDTO> parseJson(String json) throws JsonProcessingException {
         return mapper.readValue(json, new TypeReference<List<OfferResponseDTO>>() {});
     }
-
 
     private OfferResponseDTO mapToResponse(Offer offer) {
         OfferResponseDTO dto = new OfferResponseDTO();
