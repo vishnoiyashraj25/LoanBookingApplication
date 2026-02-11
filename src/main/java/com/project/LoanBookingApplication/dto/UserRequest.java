@@ -15,12 +15,14 @@ public class UserRequest {
     @NotBlank(message = "Email is required")
     private String email;
 
+    @NotBlank(message = "Phone number is required")
     @Pattern(
             regexp = "^[6-9]\\d{9}$",
             message = "Invalid Indian phone number"
     )
     private String phoneNumber;
 
+    @NotBlank(message = "Aadhar number is required")
     @Pattern(
             regexp = "\\d{12}",
             message = "Aadhar must be 12 digits"
@@ -34,8 +36,9 @@ public class UserRequest {
     )
     private String panNumber;
 
-    @Min(18)
-    @Max(75)
+    @NotNull(message = "Age is required")
+    @Min(value = 18, message = "Age must be at least 18")
+    @Max(value = 75, message = "Age must be at most 75")
     private Integer age;
 
     @NotBlank(message = "Employee Type is required")
@@ -45,7 +48,8 @@ public class UserRequest {
     @Positive(message = "Income must be positive")
     private Double monthlyIncome;
 
-    @Min(300)
-    @Max(900)
+    @NotNull(message = "Credit score is required")
+    @Min(value = 300, message = "Credit score must be between 300 and 900")
+    @Max(value = 900, message = "Credit score must be between 300 and 900")
     private Integer creditScore;
 }

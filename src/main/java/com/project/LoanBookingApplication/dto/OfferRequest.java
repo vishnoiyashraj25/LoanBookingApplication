@@ -11,6 +11,7 @@ import lombok.Setter;
 public class OfferRequest {
 
     @NotNull(message = "Lender ID is required")
+    @Positive(message = "Lender ID must be positive")
     private Long lenderId;
 
     @NotNull(message = "Minimum tenure is required")
@@ -18,7 +19,8 @@ public class OfferRequest {
     private Integer minTenure;
 
     @NotNull(message = "Maximum tenure is required")
-    @Max(360)
+    @Min(value = 1, message = "Maximum tenure must be at least 1 month")
+    @Max(value = 360, message = "Maximum tenure must be at most 360 months")
     private Integer maxTenure;
 
     @NotNull(message = "Interest rate is required")
@@ -42,6 +44,12 @@ public class OfferRequest {
     @NotNull(message = "Loan Type is required")
     private LoanType loanType;
 
-    @NotNull
+    @NotNull(message = "Offer status is required")
     private OfferStatus status;
+
+    @AssertTrue(message = "Minimum tenure must be less than or equal to maximum tenure")
+    public boolean isTenureRangeValid() {
+        if (minTenure == null || maxTenure == null) return true;
+        return minTenure <= maxTenure;
+    }
 }

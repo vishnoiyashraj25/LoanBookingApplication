@@ -7,11 +7,14 @@ import com.project.LoanBookingApplication.enums.ApplicationStatus;
 import com.project.LoanBookingApplication.enums.LenderType;
 import com.project.LoanBookingApplication.service.LoanApplicationService;
 import com.project.LoanBookingApplication.service.LoanService;
+import jakarta.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
+@Validated
 @RestController
 @RequestMapping("/api/loan")
 public class LoanApplicationController {
@@ -28,20 +31,22 @@ public class LoanApplicationController {
 
     @PostMapping("/{loanRequestId}/offer/{offerId}")
     public LoanApplicationResponse selectOffer(
-            @PathVariable Long loanRequestId,
-            @PathVariable Long offerId) {
+            @PathVariable @Positive(message = "Loan request ID must be positive") Long loanRequestId,
+            @PathVariable @Positive(message = "Offer ID must be positive") Long offerId) {
 
         return loanApplicationService.selectOffer(loanRequestId, offerId);
     }
 
     @PutMapping("/application/{id}/submit")
-    public LoanStatusResponse updateStatus(@PathVariable Long id) {
+    public LoanStatusResponse updateStatus(
+            @PathVariable @Positive(message = "Application ID must be positive") Long id) {
 
         return loanApplicationService.updateStatus(id);
     }
 
     @GetMapping("/application/{id}/status")
-    public Map<String, String> getLoanStatus(@PathVariable Long id){
+    public Map<String, String> getLoanStatus(
+            @PathVariable @Positive(message = "Application ID must be positive") Long id){
         return loanApplicationService.getLoanStatus(id);
     }
 

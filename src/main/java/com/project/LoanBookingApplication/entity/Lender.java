@@ -21,7 +21,9 @@ public class Lender {
 
     @Column(unique = true, nullable = false)
     private String lenderName;
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LenderType lenderType;
 
 //    @Enumerated(EnumType.STRING)

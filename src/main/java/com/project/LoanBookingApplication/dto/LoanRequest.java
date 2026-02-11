@@ -10,6 +10,7 @@ import lombok.Setter;
 public class LoanRequest {
 
     @NotNull(message = "User ID is required")
+    @Positive(message = "User ID must be positive")
     private Long userid;
 
     @NotNull(message = "Loan amount is required")

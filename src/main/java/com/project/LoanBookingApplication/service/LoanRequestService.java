@@ -23,7 +23,7 @@ public class LoanRequestService {
         this.userRepository = userRepository;
     }
     @Transactional
-    public LoanRequestResponse createLoanRequest(LoanRequest dto) {
+    public LoanRequestResponse createLoanRequest(com.project.LoanBookingApplication.dto.LoanRequest dto) {
 
         User user = userRepository.findById(dto.getUserid())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

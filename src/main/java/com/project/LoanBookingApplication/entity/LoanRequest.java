@@ -14,9 +14,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table
+@Table(name = "loan_request")
 public class LoanRequest {
-
+    // HIII
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,13 +25,18 @@ public class LoanRequest {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
     private Double amount;
+
+    @Column(nullable = false)
     private Integer tenure;
     @Enumerated(EnumType.STRING)
     private LoanType loanType;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private RequestStatus requestStatus;
 
+    @Column(length = 500)
     private String errorMessage;
 
 

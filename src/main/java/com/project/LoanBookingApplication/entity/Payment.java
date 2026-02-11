@@ -29,14 +29,17 @@ public class Payment {
     @JoinColumn(name = "emi_id", nullable = false)
     private EmiSchedule emiSchedule;
 
+    @Column(nullable = false)
     private Double amount;
 
-
+    @Column(nullable = false, length = 50)
     private String transactionId;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PaymentStatus paymentStatus;
 
+    @Column(nullable = false)
     private LocalDateTime receivedAt;
 }
 

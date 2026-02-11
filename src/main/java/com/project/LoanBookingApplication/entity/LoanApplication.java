@@ -30,14 +30,25 @@ public class LoanApplication {
     private LoanRequest loanRequest;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ApplicationStatus status;
 
+    @Column(nullable = false)
     private Double emi;
+
+    @Column(nullable = false)
     private Double interestRate;
+
+    @Column(nullable = false)
     private Double loanAmount;
+
+    @Column(nullable = false)
     private Integer tenure;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = true)
     private LocalDateTime expiredAt;
 
     @Version

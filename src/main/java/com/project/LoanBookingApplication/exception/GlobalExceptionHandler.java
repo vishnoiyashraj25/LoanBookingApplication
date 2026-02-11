@@ -18,6 +18,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import jakarta.validation.ConstraintViolationException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -139,9 +141,77 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
+    // @ExceptionHandler(DataIntegrityViolationException.class)
+    // public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+    //     Map<String, Object> body = new LinkedHashMap<>();
+    //     body.put("timestamp", LocalDateTime.now());
+    //     body.put("status", HttpStatus.CONFLICT.value());
+    //     body.put("error", "Conflict");
+    //     String message = "Data integrity violation";
+    //     if (ex.getCause() != null && ex.getCause().getMessage() != null) {
+    //         String causeMsg = ex.getCause().getMessage();
+    //         if (causeMsg.contains("unique") || causeMsg.contains("Unique") || causeMsg.contains("duplicate")) {
+    //             message = "Resource already exists with the same unique value.";
+    //         } else if (causeMsg.contains("foreign key") || causeMsg.contains("constraint")) {
+    //             message = "Referenced resource does not exist or constraint violated.";
+    //         } else {
+    //             message = causeMsg.length() > 200 ? causeMsg.substring(0, 200) + "..." : causeMsg;
+    //         }
+    //     }
+    //     body.put("message", message);
+    //     return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    // }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<String> handleDuplicate() {
-        return ResponseEntity.badRequest().body("Already exists.");
+public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+
+    Map<String, Object> body = new LinkedHashMap<>();
+
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", HttpStatus.CONFLICT.value());
+    body.put("error", "Conflict");
+
+    String message = "Data integrity violation";
+
+    Throwable root = ex.getMostSpecificCause();
+
+    if (root != null && root.getMessage() != null) {
+
+        String causeMsg = root.getMessage().toLowerCase();
+
+        if (causeMsg.contains("duplicate") || causeMsg.contains("unique")) {
+            message = "Resource already exists with the same unique value.";
+        }
+        else if (causeMsg.contains("foreign key")) {
+            message = "Referenced resource does not exist.";
+        }
+        else if (causeMsg.contains("not-null") || causeMsg.contains("null")) {
+            message = "Required field cannot be null.";
+        }
+        else {
+            message = causeMsg.length() > 200
+                    ? causeMsg.substring(0, 200) + "..."
+                    : causeMsg;
+        }
+    }
+
+    body.put("message", message);
+
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+}
+
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(v ->
+                errors.put(v.getPropertyPath().toString(), v.getMessage()));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("details", errors);
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalStateException.class)

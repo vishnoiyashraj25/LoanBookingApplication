@@ -6,9 +6,12 @@ import com.project.LoanBookingApplication.enums.RequestStatus;
 import com.project.LoanBookingApplication.service.EligibleOfferService;
 import com.project.LoanBookingApplication.service.LoanRequestService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/loan")
 public class LoanRequestController {
@@ -25,7 +28,8 @@ public class LoanRequestController {
     }
 
     @GetMapping("/offers/{requestId}")
-    public List<EligibleOfferResponse> getOffers(@PathVariable Long requestId){
+    public List<EligibleOfferResponse> getOffers(
+            @PathVariable @Positive(message = "Request ID must be positive") Long requestId){
         return eligibleOfferService.getOffers(requestId);
     }
 

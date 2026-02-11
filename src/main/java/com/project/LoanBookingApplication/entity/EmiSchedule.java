@@ -28,9 +28,13 @@ public class EmiSchedule {
     @JoinColumn(name = "loan_number", nullable = false)
     private Loan loan;
 
+    @Column(nullable = false)
     private Double amount;
+
+    @Column(nullable = false)
     private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private EmiStatus status;
 }

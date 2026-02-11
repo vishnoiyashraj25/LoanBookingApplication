@@ -23,13 +23,17 @@ public class Account {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 18)
     private String accountNumber;
 
+    @Column(nullable = false)
     private String bank;
+
+    @Column(nullable = false, length = 11)
     private String ifsc;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private AccountType type;
 }
 

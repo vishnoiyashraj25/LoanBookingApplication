@@ -8,7 +8,7 @@ import com.project.LoanBookingApplication.entity.User;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.AccountRepository;
 import com.project.LoanBookingApplication.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class AccountService {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
     }
-
+    
     public AccountResponse createAccount(AccountRequest accountRequest) {
 
         User user = userRepository.findById(accountRequest.getUserId())

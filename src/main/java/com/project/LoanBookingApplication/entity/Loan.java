@@ -33,15 +33,26 @@ public class Loan {
     private LoanApplication loanApplication;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LoanStatus status;
 
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LoanType loanType;
+
+    @Column(nullable = false)
     private Double emi;
+
+    @Column(nullable = false)
     private Double interest;
+
+    @Column(nullable = false)
     private Double duesAmount;
 
     @ManyToOne

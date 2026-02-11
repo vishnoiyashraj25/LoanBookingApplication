@@ -3,10 +3,13 @@ import com.project.LoanBookingApplication.dto.UserRequest;
 import com.project.LoanBookingApplication.dto.UserResponse;
 import com.project.LoanBookingApplication.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -24,7 +27,7 @@ public class UserController {
 
     @GetMapping
     public List<UserResponse> getAllUsers(
-            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) @Positive(message = "User ID must be positive when provided") Long userId,
             @RequestParam(required = false) String employeeType,
             @RequestParam(required = false) Boolean kycVerified
     ) throws Exception{

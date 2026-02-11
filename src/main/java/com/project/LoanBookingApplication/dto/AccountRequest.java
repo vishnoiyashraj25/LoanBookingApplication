@@ -10,6 +10,7 @@ import lombok.Setter;
 public class AccountRequest {
 
     @NotNull(message = "User ID is required")
+    @Positive(message = "User ID must be positive")
     private Long userId;
 
     @NotBlank(message = "Account number cannot be empty")

@@ -28,17 +28,29 @@ public class Offer {
     @JoinColumn(name = "lender_id", nullable = false)
     private Lender lender;
 
+    @Column(nullable = false)
     private Integer minTenure;
+
+    @Column(nullable = false)
     private Integer maxTenure;
+
+    @Column(nullable = false)
     private Double interestRate;
 
+    @Column(nullable = false)
     private Double minIncome;
+
+    @Column(nullable = false)
     private Integer minCreditScore;
+
+    @Column(nullable = false)
     private Double maxAmount;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private LoanType loanType;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OfferStatus status;
 }

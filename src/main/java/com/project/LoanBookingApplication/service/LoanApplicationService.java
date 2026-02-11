@@ -79,6 +79,7 @@ public class LoanApplicationService {
 
     @Transactional
     public LoanApplicationResponse selectOffer(Long loanRequestId, Long offerId) {
+        // check transaction is necessary here?
 
         LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan request not found"));
