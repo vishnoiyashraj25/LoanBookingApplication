@@ -4,6 +4,7 @@ import com.project.LoanBookingApplication.dto.EligibleOfferResponse;
 import com.project.LoanBookingApplication.entity.*;
 import com.project.LoanBookingApplication.enums.OfferStatus;
 import com.project.LoanBookingApplication.enums.RequestStatus;
+import com.project.LoanBookingApplication.exception.ConflictException;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.repository.OfferRepository;
@@ -31,11 +32,11 @@ public class EligibleOfferService {
                 .orElseThrow(() -> new ResourceNotFoundException("Loan request not found"));
 
         if(loanRequest.getRequestStatus()== RequestStatus.REJECTED){
-            throw new IllegalStateException ("Loan request is closed");
+            throw new ConflictException("Loan request is closed");
         }
 
         if(loanRequest.getRequestStatus()==RequestStatus.DONE){
-            throw new IllegalStateException("Loan request is already proceed");
+            throw new ConflictException("Loan request is already proceeded");
         }
 
         User user = loanRequest.getUser();

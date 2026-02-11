@@ -7,14 +7,18 @@ import com.project.LoanBookingApplication.entity.*;
 import com.project.LoanBookingApplication.enums.EmiStatus;
 import com.project.LoanBookingApplication.enums.LoanStatus;
 import com.project.LoanBookingApplication.enums.PaymentStatus;
+import com.project.LoanBookingApplication.exception.BadRequestException;
+import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.EmiRepository;
 import com.project.LoanBookingApplication.repository.LoanRepository;
 import com.project.LoanBookingApplication.repository.PaymentRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentService {
@@ -47,7 +51,7 @@ public class PaymentService {
     public PaymentResponse createPayment(String loan_number, PaymentRequest paymentRequest) {
 
         Loan loan = loanRepository.findById(loan_number)
-                .orElseThrow(() -> new RuntimeException("Loan not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Loan not found"));
 
         EmiSchedule emiSchedule =
                 emiRepository.findFirstByLoanAndStatusOrderByDueDateAsc(
@@ -56,7 +60,7 @@ public class PaymentService {
                 );
 
         if (emiSchedule == null) {
-            throw new RuntimeException("No pending EMI for this loan");
+            throw new ResourceNotFoundException("No pending EMI for this loan");
         }
 
         Payment payment = new Payment();
@@ -96,7 +100,14 @@ public class PaymentService {
         }
 
         if (statusStr != null) {
-            PaymentStatus status = PaymentStatus.valueOf(statusStr.toUpperCase());
+            PaymentStatus status;
+            try {
+                status = PaymentStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException(
+                        "Invalid payment status: " + statusStr + ". Allowed values: " +
+                                Arrays.stream(PaymentStatus.values()).map(Enum::name).collect(Collectors.joining(", ")));
+            }
             payments = payments.stream()
                     .filter(p -> p.getPaymentStatus() == status)
                     .toList();

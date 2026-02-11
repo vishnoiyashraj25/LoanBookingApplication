@@ -6,6 +6,7 @@ import com.project.LoanBookingApplication.entity.*;
 import com.project.LoanBookingApplication.enums.ApplicationStatus;
 import com.project.LoanBookingApplication.enums.LenderType;
 import com.project.LoanBookingApplication.enums.RequestStatus;
+import com.project.LoanBookingApplication.exception.ConflictException;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.kafka.Producer.LoanEventProducer;
 import com.project.LoanBookingApplication.repository.AccountRepository;
@@ -13,7 +14,7 @@ import com.project.LoanBookingApplication.repository.LoanApplicationRepository;
 import com.project.LoanBookingApplication.repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.repository.OfferRepository;
 import com.project.LoanBookingApplication.util.EmiCalculator;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -83,7 +84,7 @@ public class LoanApplicationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Loan request not found"));
 
         if (loanApplicationRepository.existsByLoanRequest(loanRequest)) {
-            throw new RuntimeException("Application already created for this request");
+            throw new ConflictException("Application already created for this request");
         }
 
         Offer offer = offerRepository.findById(offerId)
@@ -119,7 +120,7 @@ public class LoanApplicationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            throw new RuntimeException("This loan request has already been processed.");
+            throw new ConflictException("This loan request has already been processed.");
         }
 
         LoanRequest loanRequest = application.getLoanRequest();

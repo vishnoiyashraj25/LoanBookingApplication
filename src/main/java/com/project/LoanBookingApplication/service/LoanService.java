@@ -4,10 +4,11 @@ import com.project.LoanBookingApplication.dto.LoanResponse;
 import com.project.LoanBookingApplication.entity.*;
 import com.project.LoanBookingApplication.enums.LoanStatus;
 import com.project.LoanBookingApplication.enums.RequestStatus;
+import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.AccountRepository;
 import com.project.LoanBookingApplication.repository.LoanRepository;
 import com.project.LoanBookingApplication.repository.LoanRequestRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,6 +36,7 @@ public class LoanService {
                 System.currentTimeMillis();
     }
 
+    @Transactional
     public List<EmiResponse> createLoan(LoanApplication application) {
 
         Loan loan = new Loan();
@@ -52,7 +54,7 @@ public class LoanService {
         loan.setLoanNumber(generateLoanNumber(application));
         Account account = accountRepository.findByUser(user);
         if (account == null) {
-            throw new IllegalStateException("User account not found for userId: " + user.getUserId());
+            throw new ResourceNotFoundException("User account not found for userId: " + user.getUserId());
         }
         loan.setDisbursementAccount(account);
         loanRepository.save(loan);

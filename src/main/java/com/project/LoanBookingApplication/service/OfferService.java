@@ -37,7 +37,7 @@ public class OfferService {
 
         Lender lender = lenderRepository
                 .findById(offerRequest.getLenderId())
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("Lender not found"));
 
         offer.setLender(lender);
         offer.setInterestRate(offerRequest.getInterestRate());

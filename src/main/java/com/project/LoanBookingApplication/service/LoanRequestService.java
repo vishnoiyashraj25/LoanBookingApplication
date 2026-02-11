@@ -4,10 +4,11 @@ import com.project.LoanBookingApplication.dto.LoanRequest;
 import com.project.LoanBookingApplication.dto.LoanRequestResponse;
 import com.project.LoanBookingApplication.enums.RequestStatus;
 import com.project.LoanBookingApplication.entity.User;
+import com.project.LoanBookingApplication.exception.ConflictException;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,8 +32,7 @@ public class LoanRequestService {
                 loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.INPROCESS);
 
         if(inprocess){
-            throw new RuntimeException("This loan request is already in progress and cannot be processed again");
-
+            throw new ConflictException("This loan request is already in progress and cannot be processed again");
         }
 
         loanRequestRepository
