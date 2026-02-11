@@ -150,6 +150,33 @@ public class LoanApplicationService {
         );
     }
 
+    /**
+     * Processes an approved loan application (invoked by Kafka consumer).
+     * Creates Loan and EMI entities, then updates application and request status.
+     * All business logic lives here; the consumer only delegates to this method.
+     */
+    @Transactional
+    public void processApprovedApplication(Long applicationId) {
+        LoanApplication application = loanApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        LoanRequest loanRequest = application.getLoanRequest();
+
+        try {
+            loanService.processApprovedLoan(application);
+            loanRequest.setRequestStatus(RequestStatus.DONE);
+            application.setStatus(ApplicationStatus.APPROVED);
+            loanRequest.setErrorMessage(null);
+        } catch (Exception e) {
+            loanRequest.setRequestStatus(RequestStatus.REJECTED);
+            application.setStatus(ApplicationStatus.REJECTED);
+            loanRequest.setErrorMessage(e.getMessage());
+        } finally {
+            loanRequestRepository.save(loanRequest);
+            loanApplicationRepository.save(application);
+        }
+    }
+
     public List<LoanApplicationResponse> getApplication(
             ApplicationStatus status,
             String lenderName,

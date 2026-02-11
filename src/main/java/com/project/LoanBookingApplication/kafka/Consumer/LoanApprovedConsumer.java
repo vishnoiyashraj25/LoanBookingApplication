@@ -1,55 +1,25 @@
 package com.project.LoanBookingApplication.kafka.Consumer;
 
-import com.project.LoanBookingApplication.enums.ApplicationStatus;
-import com.project.LoanBookingApplication.entity.LoanApplication;
-import com.project.LoanBookingApplication.entity.LoanRequest;
-import com.project.LoanBookingApplication.enums.RequestStatus;
 import com.project.LoanBookingApplication.event.LoanApprovedEvent;
-import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
-import com.project.LoanBookingApplication.repository.LoanApplicationRepository;
-import com.project.LoanBookingApplication.repository.LoanRequestRepository;
-import com.project.LoanBookingApplication.service.LoanService;
+import com.project.LoanBookingApplication.service.LoanApplicationService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Thin Kafka consumer: only receives the event and delegates to the service.
+ * All business logic (create Loan/EMI, update statuses) lives in LoanApplicationService.
+ */
 @Service
 public class LoanApprovedConsumer {
 
-    private final LoanApplicationRepository loanApplicationRepository;
-    private final LoanService loanService;
-    private final LoanRequestRepository loanRequestRepository;
+    private final LoanApplicationService loanApplicationService;
 
-    public LoanApprovedConsumer(
-            LoanApplicationRepository loanApplicationRepository,
-            LoanService loanService , LoanRequestRepository loanRequestRepository) {
-        this.loanApplicationRepository = loanApplicationRepository;
-        this.loanService = loanService;
-        this.loanRequestRepository = loanRequestRepository;
+    public LoanApprovedConsumer(LoanApplicationService loanApplicationService) {
+        this.loanApplicationService = loanApplicationService;
     }
 
-    @Transactional
     @KafkaListener(topics = "${kafka.topic.loan-approved}", groupId = "${kafka.group.loan-group}")
     public void handleLoanApproved(LoanApprovedEvent event) {
-        LoanApplication application = loanApplicationRepository.findById(event.getApplicationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
-
-        LoanRequest loanRequest = application.getLoanRequest();
-
-        try {
-            loanService.processApprovedLoan(application);
-            loanRequest.setRequestStatus(RequestStatus.DONE);
-            application.setStatus(ApplicationStatus.APPROVED);
-            loanRequest.setErrorMessage(null);
-
-        } catch (Exception e) {
-            loanRequest.setRequestStatus(RequestStatus.REJECTED);
-            application.setStatus(ApplicationStatus.REJECTED);
-            loanRequest.setErrorMessage(e.getMessage());
-        } finally {
-            loanRequestRepository.save(loanRequest);
-            loanApplicationRepository.save(application);
-        }
+        loanApplicationService.processApprovedApplication(event.getApplicationId());
     }
-
 }
