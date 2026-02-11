@@ -8,7 +8,6 @@ import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.repository.OfferRepository;
 import com.project.LoanBookingApplication.util.EmiCalculator;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,12 +24,7 @@ public class EligibleOfferService {
         this.loanRequestRepository = loanRequestRepository;
         this.offerRepository = offerRepository;
     }
-
-    @Cacheable("offers")
-    public List<Offer> getAllOffersCached() {
-        return offerRepository.findAll();
-    }
-
+    
     public List<EligibleOfferResponse> getOffers(Long requestId) {
 
         LoanRequest loanRequest = loanRequestRepository.findById(requestId)
@@ -45,7 +39,7 @@ public class EligibleOfferService {
         }
 
         User user = loanRequest.getUser();
-        List<Offer> offers = getAllOffersCached();
+        List<Offer> offers = offerRepository.findAll();
 
         List<EligibleOfferResponse> responses = new ArrayList<>();
 
