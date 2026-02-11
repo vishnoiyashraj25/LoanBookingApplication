@@ -112,7 +112,7 @@ public class LoanApplicationService {
         return mapToResponse(savedApplication);
     }
 
-    @Transactional
+
     public LoanStatusResponse updateStatus(Long applicationId) {
 
         LoanApplication application = loanApplicationRepository.findById(applicationId)
@@ -126,22 +126,24 @@ public class LoanApplicationService {
         loanRequest.setRequestStatus(RequestStatus.INPROCESS);
         loanRequest.setErrorMessage(null);
         loanRequestRepository.save(loanRequest);
-        try {
-            User user = loanRequest.getUser();
-            Account account = accountRepository.findByUser(user);
-            if (account == null) {
-                throw new IllegalStateException("User account not found for userId: " + user.getUserId());
-            }
 
-            loanEventProducer.sendLoanApprovedEvent(applicationId);
-
-        } catch (Exception e) {
-            loanRequest.setRequestStatus(RequestStatus.REJECTED);
-            loanRequest.setErrorMessage(e.getMessage());
-            loanRequestRepository.save(loanRequest);
-            application.setStatus(ApplicationStatus.REJECTED);
-            loanApplicationRepository.save(application);
-        }
+//        try {
+//            User user = loanRequest.getUser();
+//            Account account = accountRepository.findByUser(user);
+//            if (account == null) {
+//                throw new IllegalStateException("User account not found for userId: " + user.getUserId());
+//            }
+//
+//            loanEventProducer.sendLoanApprovedEvent(applicationId);
+//
+//        } catch (Exception e) {
+//            loanRequest.setRequestStatus(RequestStatus.REJECTED);
+//            loanRequest.setErrorMessage(e.getMessage());
+//            loanRequestRepository.save(loanRequest);
+//            application.setStatus(ApplicationStatus.REJECTED);
+//            loanApplicationRepository.save(application);
+//        }
+        loanEventProducer.sendLoanApprovedEvent(applicationId);
         return new LoanStatusResponse(
                 applicationId,
                 "Your loan application is being processed. Please check status later."

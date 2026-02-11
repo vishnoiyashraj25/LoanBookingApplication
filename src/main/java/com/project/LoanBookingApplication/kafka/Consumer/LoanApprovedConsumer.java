@@ -31,7 +31,6 @@ public class LoanApprovedConsumer {
     @Transactional
     @KafkaListener(topics = "${kafka.topic.loan-approved}", groupId = "${kafka.group.loan-group}")
     public void handleLoanApproved(LoanApprovedEvent event) {
-
         LoanApplication application = loanApplicationRepository.findById(event.getApplicationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 

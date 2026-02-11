@@ -60,13 +60,12 @@ public class LoanService {
         return emiService.createEMI(loan);
     }
 
-    @Transactional
     public void processApprovedLoan(LoanApplication application) {
         createLoan(application);
 
-        LoanRequest req = application.getLoanRequest();
-        req.setRequestStatus(RequestStatus.DONE);
-        loanRequestRepository.save(req);
+//        LoanRequest req = application.getLoanRequest();
+//        req.setRequestStatus(RequestStatus.DONE);
+//        loanRequestRepository.save(req);
     }
 
     LoanResponse mapToDto(Loan loan) {

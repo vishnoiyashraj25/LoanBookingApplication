@@ -2,6 +2,7 @@ package com.project.LoanBookingApplication.controller;
 import com.project.LoanBookingApplication.dto.LoanRequest;
 import com.project.LoanBookingApplication.dto.LoanRequestResponse;
 import com.project.LoanBookingApplication.dto.EligibleOfferResponse;
+import com.project.LoanBookingApplication.enums.RequestStatus;
 import com.project.LoanBookingApplication.service.EligibleOfferService;
 import com.project.LoanBookingApplication.service.LoanRequestService;
 import jakarta.validation.Valid;
@@ -22,13 +23,15 @@ public class LoanRequestController {
     public LoanRequestResponse createLoanRequest(@Valid @RequestBody LoanRequest loanRequest){
         return loanRequestService.createLoanRequest(loanRequest);
     }
+
     @GetMapping("/offers/{requestId}")
     public List<EligibleOfferResponse> getOffers(@PathVariable Long requestId){
         return eligibleOfferService.getOffers(requestId);
     }
 
     @GetMapping("/requests")
-    public List<LoanRequestResponse> getLoanRequest(){
+    public List<LoanRequestResponse> getLoanRequest(
+    ){
         return loanRequestService.getLoanRequest();
     }
 }

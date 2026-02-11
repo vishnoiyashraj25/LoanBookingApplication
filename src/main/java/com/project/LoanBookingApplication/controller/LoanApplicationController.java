@@ -25,6 +25,7 @@ public class LoanApplicationController {
         this.loanService = loanService;
     }
 
+
     @PostMapping("/{loanRequestId}/offer/{offerId}")
     public LoanApplicationResponse selectOffer(
             @PathVariable Long loanRequestId,
@@ -33,7 +34,7 @@ public class LoanApplicationController {
         return loanApplicationService.selectOffer(loanRequestId, offerId);
     }
 
-    @PutMapping("/application/{id}/approve")
+    @PutMapping("/application/{id}/submit")
     public LoanStatusResponse updateStatus(@PathVariable Long id) {
 
         return loanApplicationService.updateStatus(id);

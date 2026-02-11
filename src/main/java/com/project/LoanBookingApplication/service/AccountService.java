@@ -21,7 +21,6 @@ public class AccountService {
         this.userRepository = userRepository;
     }
 
-    @Transactional
     public AccountResponse createAccount(AccountRequest accountRequest) {
 
         User user = userRepository.findById(accountRequest.getUserId())

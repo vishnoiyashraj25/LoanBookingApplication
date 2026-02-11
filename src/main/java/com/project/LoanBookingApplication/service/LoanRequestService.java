@@ -27,7 +27,6 @@ public class LoanRequestService {
         User user = userRepository.findById(dto.getUserid())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-
         boolean inprocess =
                 loanRequestRepository.existsByUserAndRequestStatus(user, RequestStatus.INPROCESS);
 
