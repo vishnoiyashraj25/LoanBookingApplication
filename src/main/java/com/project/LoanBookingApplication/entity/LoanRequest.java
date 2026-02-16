@@ -16,7 +16,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name = "loan_request")
 public class LoanRequest {
-    // HIII
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

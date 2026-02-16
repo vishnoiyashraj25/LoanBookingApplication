@@ -1,8 +1,8 @@
 package com.project.LoanBookingApplication.enums;
 
 public enum RequestStatus {
-    ACTIVE,
+    INITIATED,
     REJECTED,
     INPROCESS,
-    DONE
+    COMPLETED
 }

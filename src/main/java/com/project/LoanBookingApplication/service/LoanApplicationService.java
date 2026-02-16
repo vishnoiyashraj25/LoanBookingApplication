@@ -79,13 +79,11 @@ public class LoanApplicationService {
 
     @Transactional
     public LoanApplicationResponse selectOffer(Long loanRequestId, Long offerId) {
-        // check transaction is necessary here?
-
         LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan request not found"));
 
-        if (loanApplicationRepository.existsByLoanRequest(loanRequest)) {
-            throw new ConflictException("Application already created for this request");
+        if (loanRequest.getRequestStatus() != RequestStatus.INITIATED) {
+            throw new ConflictException("Loan request is no longer active (rejected or already in progress)");
         }
 
         Offer offer = offerRepository.findById(offerId)
@@ -115,36 +113,33 @@ public class LoanApplicationService {
     }
 
 
+    @Transactional
     public LoanStatusResponse updateStatus(Long applicationId) {
-
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            throw new ConflictException("This loan request has already been processed.");
+            throw new ConflictException("This application has already been processed.");
         }
 
         LoanRequest loanRequest = application.getLoanRequest();
+        if (loanRequest.getRequestStatus() != RequestStatus.INITIATED) {
+            throw new ConflictException("This loan request is no longer active (rejected or closed).");
+        }
+
+        List<LoanApplication> otherPending = loanApplicationRepository
+                .findByLoanRequestAndStatus(loanRequest, ApplicationStatus.PENDING);
+        for (LoanApplication other : otherPending) {
+            if (!other.getId().equals(application.getId())) {
+                other.setStatus(ApplicationStatus.CANCELLED);
+                loanApplicationRepository.save(other);
+            }
+        }
+
         loanRequest.setRequestStatus(RequestStatus.INPROCESS);
         loanRequest.setErrorMessage(null);
         loanRequestRepository.save(loanRequest);
 
-//        try {
-//            User user = loanRequest.getUser();
-//            Account account = accountRepository.findByUser(user);
-//            if (account == null) {
-//                throw new IllegalStateException("User account not found for userId: " + user.getUserId());
-//            }
-//
-//            loanEventProducer.sendLoanApprovedEvent(applicationId);
-//
-//        } catch (Exception e) {
-//            loanRequest.setRequestStatus(RequestStatus.REJECTED);
-//            loanRequest.setErrorMessage(e.getMessage());
-//            loanRequestRepository.save(loanRequest);
-//            application.setStatus(ApplicationStatus.REJECTED);
-//            loanApplicationRepository.save(application);
-//        }
         loanEventProducer.sendLoanApprovedEvent(applicationId);
         return new LoanStatusResponse(
                 applicationId,
@@ -166,7 +161,7 @@ public class LoanApplicationService {
 
         try {
             loanService.processApprovedLoan(application);
-            loanRequest.setRequestStatus(RequestStatus.DONE);
+            loanRequest.setRequestStatus(RequestStatus.COMPLETED);
             application.setStatus(ApplicationStatus.APPROVED);
             loanRequest.setErrorMessage(null);
         } catch (Exception e) {
@@ -235,14 +230,20 @@ public class LoanApplicationService {
         Map<String, String> response = new HashMap<>();
         response.put("status", request.getRequestStatus().name());
 
+        if (application.getStatus() == ApplicationStatus.CANCELLED) {
+            response.put("message", "This application was cancelled");
+            return response;
+        }
         if (request.getRequestStatus() == RequestStatus.REJECTED) {
-            response.put("message", request.getErrorMessage());
-        } else if (request.getRequestStatus() == RequestStatus.DONE) {
+            response.put("message", request.getErrorMessage() != null ? request.getErrorMessage() : "Loan application was rejected");
+        } else if (request.getRequestStatus() == RequestStatus.COMPLETED) {
             response.put("message", "Loan approved successfully");
         } else if (request.getRequestStatus() == RequestStatus.INPROCESS) {
             response.put("message", "Loan processing in progress");
+        } else if (request.getRequestStatus() == RequestStatus.INITIATED) {
+            response.put("message", "Loan request is initiated, not yet processed");
         } else {
-            response.put("message", "Loan request is active, not yet processed");
+            response.put("message", "Unknown status");
         }
         return response;
 

@@ -45,7 +45,7 @@ public class LoanService {
         loan.setUser(application.getLoanRequest().getUser());
         loan.setLender(application.getOffer().getLender());
         loan.setLoanType(application.getOffer().getLoanType());
-        loan.setStatus(LoanStatus.Active);
+        loan.setStatus(LoanStatus.ACTIVE);
         loan.setStartDate(LocalDate.now());
         loan.setEndDate(LocalDate.now().plusMonths(application.getTenure()));
         loan.setDuesAmount(application.getLoanAmount());

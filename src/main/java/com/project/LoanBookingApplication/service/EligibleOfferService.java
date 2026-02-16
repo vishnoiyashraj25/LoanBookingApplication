@@ -31,12 +31,15 @@ public class EligibleOfferService {
         LoanRequest loanRequest = loanRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan request not found"));
 
-        if(loanRequest.getRequestStatus()== RequestStatus.REJECTED){
+        if (loanRequest.getRequestStatus() == RequestStatus.REJECTED) {
             throw new ConflictException("Loan request is closed");
         }
 
-        if(loanRequest.getRequestStatus()==RequestStatus.DONE){
+        if (loanRequest.getRequestStatus() == RequestStatus.COMPLETED) {
             throw new ConflictException("Loan request is already proceeded");
+        }
+        if(loanRequest.getRequestStatus() == RequestStatus.INPROCESS){
+            throw new ConflictException("Loan request is already in progress");
         }
 
         User user = loanRequest.getUser();

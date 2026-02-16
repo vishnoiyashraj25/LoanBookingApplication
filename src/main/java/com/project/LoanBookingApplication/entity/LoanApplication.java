@@ -25,8 +25,8 @@ public class LoanApplication {
     @JoinColumn(name = "offer_id", nullable = false)
     private Offer offer;
 
-    @OneToOne
-    @JoinColumn(name = "loan_request_id", nullable = false, unique = true)
+    @ManyToOne
+    @JoinColumn(name = "loan_request_id", nullable = false)
     private LoanRequest loanRequest;
 
     @Enumerated(EnumType.STRING)

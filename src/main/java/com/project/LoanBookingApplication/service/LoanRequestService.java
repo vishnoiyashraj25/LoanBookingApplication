@@ -1,11 +1,13 @@
 package com.project.LoanBookingApplication.service;
 
-import com.project.LoanBookingApplication.dto.LoanRequest;
 import com.project.LoanBookingApplication.dto.LoanRequestResponse;
+import com.project.LoanBookingApplication.enums.ApplicationStatus;
 import com.project.LoanBookingApplication.enums.RequestStatus;
+import com.project.LoanBookingApplication.entity.LoanApplication;
 import com.project.LoanBookingApplication.entity.User;
 import com.project.LoanBookingApplication.exception.ConflictException;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
+import com.project.LoanBookingApplication.repository.LoanApplicationRepository;
 import com.project.LoanBookingApplication.repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +20,14 @@ public class LoanRequestService {
 
     private final LoanRequestRepository loanRequestRepository;
     private final UserRepository userRepository;
-    public LoanRequestService(LoanRequestRepository loanRequestRepository, UserRepository userRepository){
+    private final LoanApplicationRepository loanApplicationRepository;
+
+    public LoanRequestService(LoanRequestRepository loanRequestRepository,
+                              UserRepository userRepository,
+                              LoanApplicationRepository loanApplicationRepository) {
         this.loanRequestRepository = loanRequestRepository;
         this.userRepository = userRepository;
+        this.loanApplicationRepository = loanApplicationRepository;
     }
     @Transactional
     public LoanRequestResponse createLoanRequest(com.project.LoanBookingApplication.dto.LoanRequest dto) {
@@ -36,10 +43,16 @@ public class LoanRequestService {
         }
 
         loanRequestRepository
-                .findFirstByUserAndRequestStatus(user, RequestStatus.ACTIVE)
-                .ifPresent(lr -> {
-                    lr.setRequestStatus(RequestStatus.REJECTED);
-                    loanRequestRepository.save(lr);
+                .findFirstByUserAndRequestStatus(user, RequestStatus.INITIATED)
+                .ifPresent(previousRequest -> {
+                    previousRequest.setRequestStatus(RequestStatus.REJECTED);
+                    loanRequestRepository.save(previousRequest);
+                    List<LoanApplication> pendingApps = loanApplicationRepository
+                            .findByLoanRequestAndStatus(previousRequest, ApplicationStatus.PENDING);
+                    for (LoanApplication app : pendingApps) {
+                        app.setStatus(ApplicationStatus.CANCELLED);
+                        loanApplicationRepository.save(app);
+                    }
                 });
 
         com.project.LoanBookingApplication.entity.LoanRequest req = new com.project.LoanBookingApplication.entity.LoanRequest();
@@ -47,7 +60,7 @@ public class LoanRequestService {
         req.setAmount(dto.getAmount());
         req.setTenure(dto.getTenure());
         req.setLoanType(dto.getLoanType());
-        req.setRequestStatus(RequestStatus.ACTIVE);
+        req.setRequestStatus(RequestStatus.INITIATED);
 
         com.project.LoanBookingApplication.entity.LoanRequest loanRequest =  loanRequestRepository.save(req);
         return mapToDto(loanRequest);

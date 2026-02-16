@@ -12,7 +12,7 @@ import java.util.List;
 public interface LoanApplicationRepository extends JpaRepository<LoanApplication, Long> {
     List<LoanApplication>findByStatus(ApplicationStatus status);
     List<LoanApplication>findByOffer_Lender_LenderName(String lenderName);
-    List<LoanApplication>findByLoanRequest_User_PanNumber(String panNumber);
-    boolean existsByLoanRequest(LoanRequest loanRequest);
-
+    List<LoanApplication> findByLoanRequest_User_PanNumber(String panNumber);
+    List<LoanApplication> findByLoanRequest(LoanRequest loanRequest);
+    List<LoanApplication> findByLoanRequestAndStatus(LoanRequest loanRequest, ApplicationStatus status);
 }
