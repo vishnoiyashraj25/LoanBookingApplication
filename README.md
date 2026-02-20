@@ -305,6 +305,6 @@ src/main/java/com/project/LoanBookingApplication/
 2. Service updates DB (e.g. request status IN_PROCESS) and publishes a **LoanApprovedEvent** to the topic **`loan-approved`**.
 3. **LoanApprovedConsumer** (group: `loan-group`) consumes the event and calls the service to create the **Loan** and **EMI** schedules and update statuses.
 
-Failed messages can be sent to the Dead Letter Topic **`loan-approved.DLT`** (see `docs/KAFKA_REVIEW_QA.md`).
+Failed messages can be sent to the Dead Letter Topic **`loan-approved.DLT`**.
 
 ---
