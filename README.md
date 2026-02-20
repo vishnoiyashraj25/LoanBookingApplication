@@ -1,6 +1,6 @@
 # Loan Booking Application
 
-A full-stack **loan booking system** built with Spring Boot. It supports user onboarding, loan requests, offer selection, asynchronous loan processing via Kafka, EMI management, payments, and KYC verification—with Redis caching for performance.
+A backend **loan booking system** built with Spring Boot. It supports user onboarding, loan requests, offer selection, asynchronous loan processing via Kafka, EMI management, payments, and KYC verification—with Redis caching for performance.
 
 ---
 
