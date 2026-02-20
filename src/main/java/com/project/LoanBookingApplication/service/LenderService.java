@@ -7,6 +7,7 @@ import com.project.LoanBookingApplication.dto.LenderResponse;
 import com.project.LoanBookingApplication.entity.Lender;
 import com.project.LoanBookingApplication.enums.LenderType;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
+import com.project.LoanBookingApplication.config.CacheNames;
 import com.project.LoanBookingApplication.repository.LenderRepository;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,7 +26,7 @@ public class LenderService {
         this.lenderRepository = lenderRepository;
     }
 
-    @CacheEvict(value = "lenders", allEntries = true)
+    @CacheEvict(value = CacheNames.LENDERS, allEntries = true)
     public LenderResponse registerLender(LenderRequest request){
 
         Lender lender = new Lender();
@@ -36,7 +37,7 @@ public class LenderService {
         return mapToResponse(saveLender);
     }
 
-    @Cacheable(value = "lenders",
+    @Cacheable(value = CacheNames.LENDERS,
             key = "#lenderId + '-' + #lenderName + '-' + #lenderType")
     public List<LenderResponse> getAllLendersJson(
             Long lenderId,

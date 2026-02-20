@@ -8,8 +8,6 @@ import com.project.LoanBookingApplication.dto.UserResponse;
 import com.project.LoanBookingApplication.entity.User;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.UserRepository;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +23,6 @@ public class UserService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @CacheEvict(value = "users_list", allEntries = true)
     public UserResponse registerUser(UserRequest request) {
 
         User user = new User();
@@ -46,10 +43,6 @@ public class UserService {
         return mapToDto(saved);
     }
 
-    @Cacheable(
-            value = "users_list",
-            key = "#userId + '-' + #employeeType + '-' + #kycVerified"
-    )
     public List<UserResponse> getAllUsersJson(
             Long userId,
             String employeeType,

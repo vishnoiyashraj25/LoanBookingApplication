@@ -1,10 +1,11 @@
 package com.project.LoanBookingApplication.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
- import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -18,18 +19,6 @@ import java.util.Map;
 @EnableCaching
 public class RedisConfig {
 
-    /** Default TTL for any cache not explicitly configured. */
-    private static final Duration DEFAULT_TTL = Duration.ofMinutes(10);
-
-    /** TTL for Offer cache. */
-    private static final Duration OFFERS_TTL = Duration.ofMinutes(5);
-
-    /** TTL for Lender cache. */
-    private static final Duration LENDERS_TTL = Duration.ofMinutes(15);
-
-    /** TTL for User list cache. */
-    private static final Duration USERS_LIST_TTL = Duration.ofMinutes(10);
-
     private static RedisCacheConfiguration createCacheConfig(Duration ttl) {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(ttl)
@@ -41,15 +30,22 @@ public class RedisConfig {
                 );
     }
 
+    
+    
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    public RedisCacheManager cacheManager(
+            RedisConnectionFactory connectionFactory,
+            @Value("${cache.redis.default-ttl-minutes}") long defaultTtlMinutes,
+            @Value("${cache.redis.offers-ttl-minutes}") long offersTtlMinutes,
+            @Value("${cache.redis.lenders-ttl-minutes}") long lendersTtlMinutes) {
+
+        Duration defaultTtl = Duration.ofMinutes(defaultTtlMinutes);
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("offers", createCacheConfig(OFFERS_TTL));
-        cacheConfigurations.put("lenders", createCacheConfig(LENDERS_TTL));
-        cacheConfigurations.put("users_list", createCacheConfig(USERS_LIST_TTL));
+        cacheConfigurations.put(CacheNames.OFFERS, createCacheConfig(Duration.ofMinutes(offersTtlMinutes)));
+        cacheConfigurations.put(CacheNames.LENDERS, createCacheConfig(Duration.ofMinutes(lendersTtlMinutes)));
 
         return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(createCacheConfig(DEFAULT_TTL))
+                .cacheDefaults(createCacheConfig(defaultTtl))
                 .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
     }

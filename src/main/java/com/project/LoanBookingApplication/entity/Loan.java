@@ -9,7 +9,12 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "loans")
+@Table(name = "loans" , indexes = {
+    @Index(name = "idx_loans_lender_id", columnList = "lender_id"),
+    @Index(name = "idx_loans_user_id", columnList = "user_id"),
+    @Index(name = "idx_loans_loan_application_id", columnList = "loan_application_id"),
+    @Index(name = "idx_loans_disbursement_acc_id", columnList = "disbursement_acc_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -59,3 +64,5 @@ public class Loan {
     @JoinColumn(name = "disbursement_acc_id")
     private Account disbursementAccount;
 }
+
+// Indexes on lender_id, user_id, loan_application_id  is enough for now

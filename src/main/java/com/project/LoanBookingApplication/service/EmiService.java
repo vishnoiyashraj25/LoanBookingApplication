@@ -8,6 +8,7 @@ import com.project.LoanBookingApplication.entity.Loan;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.repository.EmiRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class EmiService {
     public EmiService(EmiRepository emiRepository){
         this.emiRepository = emiRepository;
     }
+    
     public List<EmiResponse> createEMI(Loan loan){
 
         List<EmiSchedule> schedules = new ArrayList<>();

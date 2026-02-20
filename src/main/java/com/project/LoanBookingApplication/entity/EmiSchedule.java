@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 
 @Entity
-@Table(name = "emi_schedule")
+@Table(name = "emi_schedule" , indexes = @Index(name = "idx_emi_schedule_loan_number", columnList = "loan_number"))
 @Getter
 @Setter
 @NoArgsConstructor

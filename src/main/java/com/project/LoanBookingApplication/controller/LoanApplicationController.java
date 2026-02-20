@@ -38,10 +38,10 @@ public class LoanApplicationController {
     }
 
     @PutMapping("/application/{id}/submit")
-    public LoanStatusResponse updateStatus(
+    public LoanStatusResponse submitApplication(
             @PathVariable @Positive(message = "Application ID must be positive") Long id) {
 
-        return loanApplicationService.updateStatus(id);
+        return loanApplicationService.submitApplication(id);
     }
 
     @GetMapping("/application/{id}/status")
@@ -59,5 +59,5 @@ public class LoanApplicationController {
     public List<LoanResponse> getAllLoans() {
         return loanService.getAllLoans();
     }
-
 }
+

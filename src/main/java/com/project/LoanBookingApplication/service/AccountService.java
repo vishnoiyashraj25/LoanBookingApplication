@@ -20,7 +20,7 @@ public class AccountService {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
     }
-    
+
     public AccountResponse createAccount(AccountRequest accountRequest) {
 
         User user = userRepository.findById(accountRequest.getUserId())

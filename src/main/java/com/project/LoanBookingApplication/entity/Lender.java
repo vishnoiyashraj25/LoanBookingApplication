@@ -29,3 +29,4 @@ public class Lender {
 //    @Enumerated(EnumType.STRING)
 //    private LenderStatus lenderStatus;
 }
+

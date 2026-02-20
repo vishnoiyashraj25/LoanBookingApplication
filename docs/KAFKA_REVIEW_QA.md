@@ -215,4 +215,38 @@ We do **not** use Kafka transactions (e.g. “read-process-write” with transac
 
 ---
 
-Use this document to explain how Kafka is used in your Loan Booking Application and to answer follow-up questions on producers, consumers, brokers, topics, partitions, ACKs, and default behavior in your project.
+## 17. Where are DLT messages stored? How do we see them and move forward?
+
+**Where are failed messages stored? Is it inbuilt?**  
+
+Failed messages are **stored in a Kafka topic**, not in a separate system. The **Dead Letter Topic (DLT)** is **just another Kafka topic**. When the `DeadLetterPublishingRecoverer` runs after retries are exhausted, it uses the same `KafkaTemplate` to **produce** the failed record to a topic. By default Spring Kafka names that topic **`<original-topic>.DLT`**, so in our project it is **`loan-approved.DLT`**.  
+
+So: **storage is Kafka itself**. The broker stores `loan-approved.DLT` like any other topic (same retention, partitions, replication). There is no extra “inbuilt” store — the DLT is a first-class Kafka topic. If your broker has `auto.create.topics.enable=true`, the topic is created when the first failed message is sent; otherwise you create the topic beforehand.
+
+**How can we see these messages?**  
+
+- **Kafka CLI:**  
+  `kafka-console-consumer --bootstrap-server localhost:9092 --topic loan-approved.DLT --from-beginning`  
+  You see the raw JSON (same `LoanApprovedEvent` payload) plus any headers the recoverer adds (e.g. exception info).
+
+- **Kafka UI tools:** Use any Kafka browser (e.g. Kafdrop, AKHQ, Kafka Tool, Confluent Control Center) — connect to the cluster and open the topic **`loan-approved.DLT`** to list and inspect messages.
+
+- **In the application:** We don’t currently have a consumer for the DLT. You could add a **DLT consumer** (e.g. `@KafkaListener(topics = "loan-approved.DLT", groupId = "loan-dlt-group")`) to log, alert, or store failed messages in a DB for a support dashboard.
+
+**How do we move forward with messages in the DLT?**  
+
+- **Monitor & alert:** Track lag or message count on `loan-approved.DLT`. If messages appear, alert the team to investigate (bug, bad data, or downstream outage).
+
+- **Inspect & fix:** Use the CLI or UI to see the payload and headers (e.g. exception message, stack trace). Fix the root cause (code, data, or environment).
+
+- **Replay:** After fixing, you can **re-consume** from `loan-approved.DLT` and either:  
+  - **Re-publish to main topic:** A small job or consumer reads from DLT and sends the payload back to `loan-approved` so the main consumer processes it again, or  
+  - **Process directly:** A dedicated DLT consumer calls the same business logic (e.g. `processApprovedApplication`) after validation, and only then commits the DLT offset so the message is not reprocessed again.
+
+- **Audit / manual review:** Persist DLT messages to a table (e.g. `failed_loan_events`) with status (e.g. PENDING, REPLAYED, IGNORED) so support can review and decide whether to replay or discard.
+
+In this project we **send** failed records to DLT but do **not** yet consume from it; the “move forward” strategy (replay, alerting, dashboard) would be the next step in production.
+
+---
+
+Use this document to explain how Kafka is used in your Loan Booking Application and to answer follow-up questions on producers, consumers, brokers, topics, partitions, ACKs, DLT, and default behavior in your project.

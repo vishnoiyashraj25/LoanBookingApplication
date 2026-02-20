@@ -6,6 +6,7 @@ import com.project.LoanBookingApplication.entity.*;
 import com.project.LoanBookingApplication.enums.ApplicationStatus;
 import com.project.LoanBookingApplication.enums.LenderType;
 import com.project.LoanBookingApplication.enums.RequestStatus;
+import com.project.LoanBookingApplication.exception.BusinessException;
 import com.project.LoanBookingApplication.exception.ConflictException;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
 import com.project.LoanBookingApplication.kafka.Producer.LoanEventProducer;
@@ -14,6 +15,7 @@ import com.project.LoanBookingApplication.repository.LoanApplicationRepository;
 import com.project.LoanBookingApplication.repository.LoanRequestRepository;
 import com.project.LoanBookingApplication.repository.OfferRepository;
 import com.project.LoanBookingApplication.util.EmiCalculator;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -31,12 +33,16 @@ public class LoanApplicationService {
     private final LoanService loanService;
     private final LoanEventProducer loanEventProducer;
     private final AccountRepository accountRepository;
+    private final LoanApplicationService self;
 
     public LoanApplicationService(
             LoanRequestRepository loanRequestRepository,
             OfferRepository offerRepository,
             LoanApplicationRepository loanApplicationRepository,
-            LoanService loanService, LoanEventProducer loanEventProducer,AccountRepository accountRepository) {
+            LoanService loanService,
+            LoanEventProducer loanEventProducer,
+            AccountRepository accountRepository,
+            @Lazy LoanApplicationService self) {
 
         this.loanRequestRepository = loanRequestRepository;
         this.offerRepository = offerRepository;
@@ -44,6 +50,7 @@ public class LoanApplicationService {
         this.loanService = loanService;
         this.loanEventProducer = loanEventProducer;
         this.accountRepository = accountRepository;
+        this.self = self;
     }
 
     private LoanApplicationResponse mapToResponse(LoanApplication application) {
@@ -77,7 +84,6 @@ public class LoanApplicationService {
         return response;
     }
 
-    @Transactional
     public LoanApplicationResponse selectOffer(Long loanRequestId, Long offerId) {
         LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan request not found"));
@@ -113,13 +119,17 @@ public class LoanApplicationService {
     }
 
 
+    /**
+     * Persists DB changes for submission: cancel other pending applications
+     * and set loan request to INPROCESS. Called before sending Kafka event.
+     */
     @Transactional
-    public LoanStatusResponse updateStatus(Long applicationId) {
+    public void persistSubmissionChanges(Long applicationId) {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 
         if (application.getStatus() != ApplicationStatus.PENDING) {
-            throw new ConflictException("This application has already been processed.");
+            throw new ConflictException("This application has already been processed or cancelled.");
         }
 
         LoanRequest loanRequest = application.getLoanRequest();
@@ -139,7 +149,11 @@ public class LoanApplicationService {
         loanRequest.setRequestStatus(RequestStatus.INPROCESS);
         loanRequest.setErrorMessage(null);
         loanRequestRepository.save(loanRequest);
+    }
 
+    public LoanStatusResponse submitApplication(Long applicationId) {
+        self.persistSubmissionChanges(applicationId);
+        // Event sent only after DB changes succeed; if transaction rolls back, this is never reached.
         loanEventProducer.sendLoanApprovedEvent(applicationId);
         return new LoanStatusResponse(
                 applicationId,
@@ -152,10 +166,18 @@ public class LoanApplicationService {
      * Creates Loan and EMI entities, then updates application and request status.
      * All business logic lives here; the consumer only delegates to this method.
      */
+
+    
     @Transactional
     public void processApprovedApplication(Long applicationId) {
         LoanApplication application = loanApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+
+        // check if application is already approved or rejected
+        if (application.getStatus() == ApplicationStatus.APPROVED || application.getStatus() == ApplicationStatus.REJECTED || application.getStatus() == ApplicationStatus.CANCELLED) {
+            throw new ConflictException("Application is already approved or rejected");
+        }
 
         LoanRequest loanRequest = application.getLoanRequest();
 
@@ -164,14 +186,15 @@ public class LoanApplicationService {
             loanRequest.setRequestStatus(RequestStatus.COMPLETED);
             application.setStatus(ApplicationStatus.APPROVED);
             loanRequest.setErrorMessage(null);
-        } catch (Exception e) {
+        } catch (BusinessException e) {
+            // Only business failures → reject and ack (no retry, no DLT)
             loanRequest.setRequestStatus(RequestStatus.REJECTED);
             application.setStatus(ApplicationStatus.REJECTED);
             loanRequest.setErrorMessage(e.getMessage());
-        } finally {
-            loanRequestRepository.save(loanRequest);
-            loanApplicationRepository.save(application);
         }
+        // Other exceptions propagate → consumer does not ack → retry then DLT
+        loanRequestRepository.save(loanRequest);
+        loanApplicationRepository.save(application);
     }
 
     public List<LoanApplicationResponse> getApplication(
@@ -246,6 +269,5 @@ public class LoanApplicationService {
             response.put("message", "Unknown status");
         }
         return response;
-
     }
 }

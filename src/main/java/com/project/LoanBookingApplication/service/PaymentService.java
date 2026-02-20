@@ -50,7 +50,7 @@ public class PaymentService {
     @Transactional
     public PaymentResponse createPayment(String loan_number, PaymentRequest paymentRequest) {
 
-        Loan loan = loanRepository.findById(loan_number)
+        Loan loan = loanRepository.findByLoanNumber(loan_number)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan not found"));
 
         EmiSchedule emiSchedule =
@@ -111,6 +111,10 @@ public class PaymentService {
             payments = payments.stream()
                     .filter(p -> p.getPaymentStatus() == status)
                     .toList();
+        }
+
+        if (payments.isEmpty()) {
+            throw new ResourceNotFoundException("No payments exists");
         }
 
         return payments.stream()

@@ -10,6 +10,7 @@ import com.project.LoanBookingApplication.enums.LenderType;
 import com.project.LoanBookingApplication.enums.LoanType;
 import com.project.LoanBookingApplication.enums.OfferStatus;
 import com.project.LoanBookingApplication.exception.ResourceNotFoundException;
+import com.project.LoanBookingApplication.config.CacheNames;
 import com.project.LoanBookingApplication.repository.LenderRepository;
 import com.project.LoanBookingApplication.repository.OfferRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -30,7 +31,7 @@ public class OfferService {
         this.lenderRepository = lenderRepository;
     }
 
-    @CacheEvict(value = "offers", allEntries = true)
+    @CacheEvict(value = CacheNames.OFFERS, allEntries = true)
     public OfferResponse createOffer(OfferRequest offerRequest) {
 
         Offer offer = new Offer();
@@ -55,7 +56,7 @@ public class OfferService {
     }
 
     @Cacheable(
-            value = "offers",
+            value = CacheNames.OFFERS,
             key = "#offerId + '-' + #lenderName + '-' + #lenderType + '-' + #loanType + '-' + #status"
     )
     public List<OfferResponse> getAllOffersJson(

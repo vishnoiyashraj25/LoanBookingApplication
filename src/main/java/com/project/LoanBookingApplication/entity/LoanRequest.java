@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "loan_request")
+@Table(name = "loan_request", indexes = @Index(name = "idx_loan_request_user_id", columnList = "user_id"))
 public class LoanRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,3 +40,5 @@ public class LoanRequest {
 
 
 }
+
+// Indexes on user_id is enough for now

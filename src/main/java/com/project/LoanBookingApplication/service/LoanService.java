@@ -62,6 +62,7 @@ public class LoanService {
         return emiService.createEMI(loan);
     }
 
+    @Transactional
     public void processApprovedLoan(LoanApplication application) {
         createLoan(application);
 

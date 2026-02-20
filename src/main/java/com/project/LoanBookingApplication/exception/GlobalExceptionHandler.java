@@ -141,27 +141,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    // @ExceptionHandler(DataIntegrityViolationException.class)
-    // public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-    //     Map<String, Object> body = new LinkedHashMap<>();
-    //     body.put("timestamp", LocalDateTime.now());
-    //     body.put("status", HttpStatus.CONFLICT.value());
-    //     body.put("error", "Conflict");
-    //     String message = "Data integrity violation";
-    //     if (ex.getCause() != null && ex.getCause().getMessage() != null) {
-    //         String causeMsg = ex.getCause().getMessage();
-    //         if (causeMsg.contains("unique") || causeMsg.contains("Unique") || causeMsg.contains("duplicate")) {
-    //             message = "Resource already exists with the same unique value.";
-    //         } else if (causeMsg.contains("foreign key") || causeMsg.contains("constraint")) {
-    //             message = "Referenced resource does not exist or constraint violated.";
-    //         } else {
-    //             message = causeMsg.length() > 200 ? causeMsg.substring(0, 200) + "..." : causeMsg;
-    //         }
-    //     }
-    //     body.put("message", message);
-    //     return new ResponseEntity<>(body, HttpStatus.CONFLICT);
-    // }
-
     @ExceptionHandler(DataIntegrityViolationException.class)
 public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
 

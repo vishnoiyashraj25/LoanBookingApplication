@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts" , indexes = @Index(name = "idx_accounts_user_id", columnList = "user_id"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -36,4 +36,9 @@ public class Account {
     @Column(nullable = false)
     private AccountType type;
 }
+
+
+
+
+
 

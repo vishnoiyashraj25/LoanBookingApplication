@@ -10,7 +10,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "loan_applications")
+@Table(name = "loan_applications", indexes = {
+    @Index(name = "idx_loan_applications_offer_id", columnList = "offer_id"),
+    @Index(name = "idx_loan_applications_loan_request_id", columnList = "loan_request_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,3 +57,5 @@ public class LoanApplication {
     @Version
     private Integer version;
 }
+
+// Indexes on offer_id, loan_request_id is enough for now

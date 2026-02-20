@@ -51,6 +51,6 @@ public class Offer {
     private LoanType loanType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private OfferStatus status;
 }
